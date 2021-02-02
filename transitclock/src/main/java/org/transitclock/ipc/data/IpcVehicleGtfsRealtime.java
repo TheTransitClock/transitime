@@ -22,7 +22,7 @@ import java.util.Date;
 
 import org.transitclock.applications.Core;
 import org.transitclock.core.BlockAssignmentMethod;
-import org.transitclock.core.SpatialMatch;
+import org.transitclock.core.RouteMatch;
 import org.transitclock.core.TemporalDifference;
 import org.transitclock.core.TemporalMatch;
 import org.transitclock.core.VehicleState;
@@ -89,7 +89,7 @@ public class IpcVehicleGtfsRealtime extends IpcVehicle {
 		// stop ID and gtfs stop sequence.
 		TemporalMatch temporalMatch = vs.getMatch();
 		if (temporalMatch != null) {
-			SpatialMatch match = vs.getMatch().getMatchBeforeStopIfAtStop();			
+			RouteMatch match = vs.getMatch().getMatchBeforeStopIfAtStop();			
 			atStop = match.getAtStop() != null;
 			
 			// Determine stop info depending on whether it is at a stop or in 

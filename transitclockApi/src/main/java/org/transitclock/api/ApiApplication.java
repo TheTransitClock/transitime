@@ -38,5 +38,7 @@ public class ApiApplication extends ResourceConfig {
 		// Register all root-resource classes in package that handle @Path
 		// requests
 		packages("org.transitclock.api.rootResources");
+		//packages("org.transitclock.api.data.customwriter");
+		
 	}
 }

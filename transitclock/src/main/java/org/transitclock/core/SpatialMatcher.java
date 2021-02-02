@@ -51,7 +51,7 @@ import org.transitclock.utils.Time;
 public class SpatialMatcher {
 
 	// So that know where to start searching from
-	private SpatialMatch startSearchSpatialMatch = null;
+	private RouteMatch startSearchSpatialMatch = null;
 	
 	// For keeping track of whether getting closer or further away
 	private double previousDistanceToSegment = Double.MAX_VALUE;
@@ -60,12 +60,12 @@ public class SpatialMatcher {
 
 	// For keeping track of potential matches where heading and
 	// distance to segment are acceptable.
-	private SpatialMatch previousPotentialSpatialMatch = null;
+	private RouteMatch previousPotentialSpatialMatch = null;
 
 	// For keeping track of match with best distance. This is useful for
 	// logging in case something goes wrong. It lets one determine if
 	// need to make the system more lenient.
-	private SpatialMatch smallestDistanceSpatialMatch = null;
+	private RouteMatch smallestDistanceSpatialMatch = null;
 
 	// For keeping track of what kind of spatial matching being done
 	public enum MatchingType {STANDARD_MATCHING, AUTO_ASSIGNING_MATCHING};
@@ -95,7 +95,7 @@ public class SpatialMatcher {
 	 * 
 	 * @param startSearchSpatialMatch
 	 */
-	private void setStartOfSearch(SpatialMatch startSearchSpatialMatch) {
+	private void setStartOfSearch(RouteMatch startSearchSpatialMatch) {
 		this.startSearchSpatialMatch = startSearchSpatialMatch;
 	}
 
@@ -114,12 +114,12 @@ public class SpatialMatcher {
 	 * @return List of potential SpatialMatches. Can be empty but will not be
 	 *         null.
 	 */
-	private List<SpatialMatch> getSpatialMatchesForTrip(AvlReport avlReport,
+	private List<RouteMatch> getSpatialMatchesForTrip(AvlReport avlReport,
 			Trip trip, MatchingType matchingType) {
 		Block block = trip.getBlock();
 		
 		// The matches to be returned
-		List<SpatialMatch> spatialMatches = new ArrayList<SpatialMatch>();
+		List<RouteMatch> spatialMatches = new ArrayList<RouteMatch>();
 		
 		// Start looking for matches at the beginning of the trip.
 		Indices indices = new Indices(block, block.getTripIndex(trip), 
@@ -160,9 +160,9 @@ public class SpatialMatcher {
 	 * @param spatialMatchesForTrip
 	 * @return
 	 */
-	private static SpatialMatch getFirstNonLayoverSpatialMatch(
-			List<SpatialMatch> spatialMatchesForTrip) {
-		for (SpatialMatch match : spatialMatchesForTrip) {
+	private static RouteMatch getFirstNonLayoverSpatialMatch(
+			List<RouteMatch> spatialMatchesForTrip) {
+		for (RouteMatch match : spatialMatchesForTrip) {
 			if (!match.isLayover())
 				return match;
 		}
@@ -192,7 +192,7 @@ public class SpatialMatcher {
 	 *         heading in proper direction for the match.
 	 */
 	public static boolean problemMatchDueToLackOfHeadingInfo(
-			SpatialMatch spatialMatch,
+			RouteMatch spatialMatch,
 			VehicleState vehicleState, 
 			MatchingType matchingType) {
 		// If there was no spatial match then there can't be a problem
@@ -227,13 +227,13 @@ public class SpatialMatcher {
 			return true;
 		
 		// Determine matches for the previous AvlReport
-		List<SpatialMatch> spatialMatchesForPreviousReport =
+		List<RouteMatch> spatialMatchesForPreviousReport =
 				(new SpatialMatcher()).getSpatialMatchesForTrip(
 						previousAvlReport, trip, matchingType);
 
 		// There can be multiple matches, but only look at first 
 		// non-layover ones for the previous report
-		SpatialMatch previousNonLayoverSpatialMatch =
+		RouteMatch previousNonLayoverSpatialMatch =
 				getFirstNonLayoverSpatialMatch(
 						spatialMatchesForPreviousReport);
 		
@@ -277,12 +277,12 @@ public class SpatialMatcher {
 	 *            for keeping track of what kind of spatial matching being done
 	 * @return non-null possibly empty list of spatial matches
 	 */
-	public static List<SpatialMatch> getSpatialMatches(
+	public static List<RouteMatch> getSpatialMatches(
 			AvlReport avlReport,
 			Block block, List<Trip> tripsToInvestigate,
 			MatchingType matchingType) {
-		List<SpatialMatch> spatialMatchesForAllTrips = 
-				new ArrayList<SpatialMatch>();
+		List<RouteMatch> spatialMatchesForAllTrips = 
+				new ArrayList<RouteMatch>();
 
 		// If no trips to investigate then done
 		if (tripsToInvestigate == null || tripsToInvestigate.isEmpty())
@@ -300,9 +300,9 @@ public class SpatialMatcher {
 				// So can determine when to stop copying. Need to stop
 				// when starting to look at another trip.
 				String tripIdThatFoundTripPatternFor = null;
-				List<SpatialMatch> matchListForIteration = 
-						new ArrayList<SpatialMatch>(spatialMatchesForAllTrips);
-				for (SpatialMatch spatialMatch : matchListForIteration) {
+				List<RouteMatch> matchListForIteration = 
+						new ArrayList<RouteMatch>(spatialMatchesForAllTrips);
+				for (RouteMatch spatialMatch : matchListForIteration) {
 					String spatialMatchTripPatternId = spatialMatch.getTrip()
 							.getTripPattern().getId();
 					String currentTripPatternId = trip.getTripPattern().getId();
@@ -310,7 +310,7 @@ public class SpatialMatcher {
 							&& (tripIdThatFoundTripPatternFor == null || tripIdThatFoundTripPatternFor
 									.equals(spatialMatch.getTrip().getId()))) {
 						foundTripPattern = true;
-						SpatialMatch spatialMatchCopy = new SpatialMatch(
+						RouteMatch spatialMatchCopy = new RouteMatch(
 								spatialMatch, trip);
 						spatialMatchesForAllTrips.add(spatialMatchCopy);
 						tripIdThatFoundTripPatternFor = spatialMatch.getTrip()
@@ -328,7 +328,7 @@ public class SpatialMatcher {
 			} else {
 				// Haven't already examined this trip pattern for spatial
 				// matches so do so now.
-				List<SpatialMatch> spatialMatchesForTrip =
+				List<RouteMatch> spatialMatchesForTrip =
 						(new SpatialMatcher()).getSpatialMatchesForTrip(
 								avlReport, trip, matchingType);
 				
@@ -345,10 +345,10 @@ public class SpatialMatcher {
 		// will frequently be at the end of the trip, which should be considered
 		// fine.
 		if (!block.isNoSchedule()) {
-			Iterator<SpatialMatch> iterator =
+			Iterator<RouteMatch> iterator =
 					spatialMatchesForAllTrips.iterator();
 			while (iterator.hasNext()) {
-				SpatialMatch match = iterator.next();
+				RouteMatch match = iterator.next();
 				if (block.nearEndOfBlock(match, CoreConfig
 						.getDistanceFromEndOfBlockForInitialMatching())) {
 					// The match is too close to end of block so don't use it
@@ -392,18 +392,18 @@ public class SpatialMatcher {
 	 *            through all trips.
 	 * @return non-null possibly empty list of spatial matches
 	 */
-	public static List<SpatialMatch> getSpatialMatchesForAutoAssigning(
+	public static List<RouteMatch> getSpatialMatchesForAutoAssigning(
 			AvlReport avlReport, Block block,
 			List<Trip> tripsToInvestigate) {
 		// Get all the spatial matches
-		List<SpatialMatch> allSpatialMatches =
+		List<RouteMatch> allSpatialMatches =
 				getSpatialMatches(avlReport, block, tripsToInvestigate,
 						MatchingType.AUTO_ASSIGNING_MATCHING);
 
 		// Filter out the ones that are layovers
-		List<SpatialMatch> spatialMatches = 
-				new ArrayList<SpatialMatch>();
-		for (SpatialMatch spatialMatch : allSpatialMatches) {
+		List<RouteMatch> spatialMatches = 
+				new ArrayList<RouteMatch>();
+		for (RouteMatch spatialMatch : allSpatialMatches) {
 			if (!spatialMatch.isLayover() || spatialMatchToLayoversAllowedForAutoAssignment.getValue())
 				spatialMatches.add(spatialMatch);
 		}		
@@ -543,7 +543,7 @@ public class SpatialMatcher {
 	 */
 	private void processPossiblePotentialMatch(AvlReport avlReport,
 			Indices potentialMatchIndices,
-			List<SpatialMatch> spatialMatches,
+			List<RouteMatch> spatialMatches,
 			MatchingType matchingType) {
 		// Convenience variables
 		VectorWithHeading segmentVector = potentialMatchIndices.getSegment();
@@ -611,7 +611,7 @@ public class SpatialMatcher {
 		}
 		
 		// Create the SpatialMatch object for the specified indices
-		SpatialMatch spatialMatch = new SpatialMatch(
+		RouteMatch spatialMatch = new RouteMatch(
 				avlReport.getTime(),
 				potentialMatchIndices.getBlock(),
 				potentialMatchIndices.getTripIndex(),
@@ -730,14 +730,14 @@ public class SpatialMatcher {
 	 * @return list of possible spatial matches. If no spatial matches then
 	 *         returns empty list (as opposed to null)
 	 */
-	public static List<SpatialMatch>
+	public static List<RouteMatch>
 			getSpatialMatches(VehicleState vehicleState) {
 		// Some convenience variables
 		TemporalMatch previousMatch = vehicleState.getMatch();
 		SpatialMatcher spatialMatcher = new SpatialMatcher();
 		
 		// The matches to be returned
-		List<SpatialMatch> spatialMatches = new ArrayList<SpatialMatch>();
+		List<RouteMatch> spatialMatches = new ArrayList<RouteMatch>();
 
 		// Don't want to waste time search forward too far. So limit distance
 		// such that vehicle would have traveled at 30% more than the max speed 
@@ -848,7 +848,7 @@ public class SpatialMatcher {
 			int indexOfLastSegment = lastStopPath.getNumberSegments()-1;
 			double segmentLength = 
 					lastStopPath.getSegmentVector(indexOfLastSegment).length();
-			SpatialMatch matchAtEndOfBlock = new SpatialMatch(
+			RouteMatch matchAtEndOfBlock = new RouteMatch(
 					vehicleState.getAvlReport().getTime(),
 					block, 
 					previousMatch.getTripIndex(),

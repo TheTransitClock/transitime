@@ -31,13 +31,13 @@ import org.transitclock.utils.Time;
  * @author SkiBu Smith
  * 
  */
-public class TemporalMatch extends SpatialMatch {
+public class TemporalMatch extends RouteMatch {
 
 	private final TemporalDifference temporalDifference;
 	
 	/********************** Member Functions **************************/
 
-	public TemporalMatch(SpatialMatch spatialMatch, 
+	public TemporalMatch(RouteMatch spatialMatch, 
 			TemporalDifference temporalDifference) {
 		super(spatialMatch);
 		this.temporalDifference = temporalDifference;

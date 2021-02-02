@@ -33,6 +33,7 @@ import org.transitclock.db.webstructs.ApiKeyManager;
 import org.transitclock.ipc.clients.CacheQueryInterfaceFactory;
 import org.transitclock.ipc.clients.CommandsInterfaceFactory;
 import org.transitclock.ipc.clients.ConfigInterfaceFactory;
+import org.transitclock.ipc.clients.DiversionsInterfaceFactory;
 import org.transitclock.ipc.clients.HoldingTimeInterfaceFactory;
 import org.transitclock.ipc.clients.PredictionAnalysisInterfaceFactory;
 import org.transitclock.ipc.clients.PredictionsInterfaceFactory;
@@ -41,6 +42,7 @@ import org.transitclock.ipc.clients.VehiclesInterfaceFactory;
 import org.transitclock.ipc.interfaces.CacheQueryInterface;
 import org.transitclock.ipc.interfaces.CommandsInterface;
 import org.transitclock.ipc.interfaces.ConfigInterface;
+import org.transitclock.ipc.interfaces.DiversionsInterface;
 import org.transitclock.ipc.interfaces.HoldingTimeInterface;
 import org.transitclock.ipc.interfaces.PredictionAnalysisInterface;
 import org.transitclock.ipc.interfaces.PredictionsInterface;
@@ -314,6 +316,22 @@ public class StandardParameters {
 
 		return holdingTimeInterface ;
 	}
+	
+	/**
+	 * Gets the DiversionsInterface for the specified agencyId. If not valid
+	 * then throws WebApplicationException.
+	 * 
+	 * @return The PredictionAnalysisInterface
+	 */
+	public DiversionsInterface getDiversionInterface()
+	{
+		DiversionsInterface diversionsInterface = DiversionsInterfaceFactory.get(agencyId);
+		if (diversionsInterface  == null)
+			throw WebUtils.badRequestException("Agency ID " + agencyId
+					+ " is not valid");
+
+		return diversionsInterface ;
+	}	
 	
 	/**
 	 * Simple getter for the key

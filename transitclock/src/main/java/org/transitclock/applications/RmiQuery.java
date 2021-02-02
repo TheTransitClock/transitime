@@ -34,11 +34,13 @@ import org.transitclock.config.ConfigFileReader;
 import org.transitclock.db.structs.Location;
 import org.transitclock.ipc.clients.CommandsInterfaceFactory;
 import org.transitclock.ipc.clients.ConfigInterfaceFactory;
+import org.transitclock.ipc.clients.DiversionsInterfaceFactory;
 import org.transitclock.ipc.clients.PredictionsInterfaceFactory;
 import org.transitclock.ipc.clients.VehiclesInterfaceFactory;
 import org.transitclock.ipc.data.IpcActiveBlock;
 import org.transitclock.ipc.data.IpcBlock;
 import org.transitclock.ipc.data.IpcDirectionsForRoute;
+import org.transitclock.ipc.data.IpcDiversions;
 import org.transitclock.ipc.data.IpcPredictionsForRouteStopDest;
 import org.transitclock.ipc.data.IpcRoute;
 import org.transitclock.ipc.data.IpcRouteSummary;
@@ -48,6 +50,7 @@ import org.transitclock.ipc.data.IpcVehicle;
 import org.transitclock.ipc.data.IpcVehicleComplete;
 import org.transitclock.ipc.interfaces.CommandsInterface;
 import org.transitclock.ipc.interfaces.ConfigInterface;
+import org.transitclock.ipc.interfaces.DiversionsInterface;
 import org.transitclock.ipc.interfaces.PredictionsInterface;
 import org.transitclock.ipc.interfaces.VehiclesInterface;
 import org.transitclock.ipc.interfaces.PredictionsInterface.RouteStop;
@@ -79,7 +82,7 @@ public class RmiQuery {
 	
 	private static enum Command {NOT_SPECIFIED, GET_PREDICTIONS, GET_VEHICLES, 
 		GET_ROUTE_CONFIG, GET_CONFIG, 
-		GET_ACTIVE_BLOCKS, RESET_VEHICLE};
+		GET_ACTIVE_BLOCKS, RESET_VEHICLE, GET_DETOURS};
 
 	/********************** Member Functions **************************/
 
@@ -197,6 +200,8 @@ public class RmiQuery {
 			command = Command.GET_ACTIVE_BLOCKS;
 		else if ("resetVehicle".equals(commandStr))
 			command = Command.RESET_VEHICLE;
+		else if("detours".equals(commandStr))
+			command = Command.GET_DETOURS;
 		else {
 			System.out.println("Command \"" + commandStr + "\" is not valid.\n");
 			displayCommandLineOptionsAndExit(options);
@@ -461,11 +466,24 @@ public class RmiQuery {
 				getActiveBlocks();
 			} else if(command == Command.RESET_VEHICLE) {
 				resetVehicles();
-			}
+			} else if(command == Command.GET_DETOURS)
+				getDetours();
+			
 		} catch (Exception e) {
 			// Output stack trace as error message
 			e.printStackTrace();
 		}
+	}
+
+	private static void getDetours() throws Exception {
+		// TODO Auto-generated method stub
+		DiversionsInterface detourInterface=DiversionsInterfaceFactory.get(agencyId);
+		
+		IpcDiversions result = detourInterface.getDiversionsForTrip(tripId);
+		
+		if(result!=null)		
+			System.out.println(result.toString());
+		
 	}
 
 	private static void resetVehicles() throws Exception {		

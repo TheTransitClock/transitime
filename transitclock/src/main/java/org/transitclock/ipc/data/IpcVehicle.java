@@ -28,7 +28,7 @@ import java.util.Date;
 
 import org.transitclock.applications.Core;
 import org.transitclock.core.BlockAssignmentMethod;
-import org.transitclock.core.SpatialMatch;
+import org.transitclock.core.RouteMatch;
 import org.transitclock.core.TemporalDifference;
 import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.PredictionDataCache;
@@ -113,7 +113,7 @@ public class IpcVehicle implements Serializable {
 			// Get the match. If match is just after a stop then adjust
 			// it to just before the stop so that can determine proper 
 			// stop ID and such.
-			SpatialMatch match = vs.getMatch().getMatchBeforeStopIfAtStop();
+			RouteMatch match = vs.getMatch().getMatchBeforeStopIfAtStop();
 
 			// Determine if vehicle is at layover, and if so, what time it 
 			// should depart. The departure time isn't necessarily the 

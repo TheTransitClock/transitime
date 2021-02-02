@@ -58,7 +58,7 @@ import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.StringConfigValue;
 import org.transitclock.configData.AgencyConfig;
 import org.transitclock.configData.CoreConfig;
-import org.transitclock.core.SpatialMatch;
+import org.transitclock.core.RouteMatch;
 import org.transitclock.db.hibernate.HibernateUtils;
 import org.transitclock.gtfs.DbConfig;
 import org.transitclock.logging.Markers;
@@ -1280,7 +1280,7 @@ public final class Block implements Serializable {
 	 * @param distance
 	 * @return True if within distance of end of block
 	 */
-	public boolean nearEndOfBlock(SpatialMatch match, double distance) {
+	public boolean nearEndOfBlock(RouteMatch match, double distance) {
 		// If not last trip of block then not considered near end
 		// so return false.
 		if (match.getTripIndex() != trips.size()-1)

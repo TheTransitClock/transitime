@@ -3,7 +3,7 @@ package org.transitclock.core.predictiongenerator;
 
 import org.transitclock.core.HeadwayDetails;
 import org.transitclock.core.Indices;
-import org.transitclock.core.SpatialMatch;
+import org.transitclock.core.RouteMatch;
 import org.transitclock.core.VehicleState;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.ipc.data.IpcPrediction;
@@ -14,6 +14,6 @@ public interface PredictionComponentElementsGenerator {
 	
 	long getStopTimeForPath(Indices indices,  AvlReport avlReport, VehicleState vehicleState);
 	
-	long expectedTravelTimeFromMatchToEndOfStopPath(AvlReport avlReport, SpatialMatch match);
+	long expectedTravelTimeFromMatchToEndOfStopPath(AvlReport avlReport, RouteMatch match);
 		
 }

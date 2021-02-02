@@ -24,7 +24,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.transitclock.core.BlockAssignmentMethod;
-import org.transitclock.core.SpatialMatch;
+import org.transitclock.core.RouteMatch;
 import org.transitclock.core.TemporalDifference;
 import org.transitclock.core.VehicleState;
 import org.transitclock.db.structs.Trip;
@@ -75,7 +75,7 @@ public class IpcVehicleComplete extends IpcVehicleGtfsRealtime {
 			// Get the match. If match is just after a stop then adjust
 			// it to just before the stop so that can determine proper 
 			// stop ID and such.
-			SpatialMatch match = vs.getMatch().getMatchBeforeStopIfAtStop();
+			RouteMatch match = vs.getMatch().getMatchBeforeStopIfAtStop();
 			// If vehicle is at a stop then "next" stop will actually be
 			// the current stop.
 			this.distanceToNextStop = match.getDistanceRemainingInStopPath();

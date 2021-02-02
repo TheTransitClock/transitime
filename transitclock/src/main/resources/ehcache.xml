@@ -5,7 +5,21 @@
 	xsi:schemaLocation="http://www.ehcache.org/v3 http://www.ehcache.org/schema/ehcache-core-3.1.xsd">
 	<ehcache:persistence directory="/usr/local/transitclock/cache/" />
 	<ehcache:disk-store thread-pool="pool-disk" />
-	
+
+	<ehcache:cache alias="diversionsCache">	
+		<ehcache:key-type >org.transitclock.core.diversion.model.Diversion.DiversionsKey</ehcache:key-type>
+		<ehcache:value-type> org.transitclock.core.diversion.cache.DiversionsList</ehcache:value-type>		
+		<ehcache:expiry>
+			<ehcache:tti unit="days">1</ehcache:tti>
+		</ehcache:expiry>		
+		<ehcache:resources>
+			<ehcache:heap unit="entries">2000</ehcache:heap>
+			<ehcache:offheap unit="MB">100</ehcache:offheap>
+			<ehcache:disk unit="MB">200</ehcache:disk>
+		</ehcache:resources>
+		<ehcache:disk-store-settings thread-pool="pool-disk"
+			writer-concurrency="1" />
+	</ehcache:cache>
 		
 	<ehcache:cache alias="dwellTimeModelCache">
 		<ehcache:key-type >org.transitclock.core.dataCache.StopPathCacheKey</ehcache:key-type>

@@ -20,13 +20,17 @@ package org.transitclock.feed.gtfsRt;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
-
-
+import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.transitclock.core.diversion.cache.DiversionsCacheFactory;
+import org.transitclock.core.diversion.model.Diversion;
+import org.transitclock.core.diversion.model.DiversionStopPath;
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.AvlReport.AssignmentType;
+import org.transitclock.db.structs.Location;
 import org.transitclock.utils.IntervalTimer;
 import org.transitclock.utils.MathUtils;
 import org.transitclock.utils.Time;
@@ -35,7 +39,11 @@ import com.google.protobuf.CodedInputStream;
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import com.google.transit.realtime.GtfsRealtime.Position;
+import com.google.transit.realtime.GtfsRealtime.Shape;
+import com.google.transit.realtime.GtfsRealtime.ShapePoint;
 import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
+import com.google.transit.realtime.GtfsRealtime.TripProperties;
+import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
 import com.google.transit.realtime.GtfsRealtime.VehiclePosition;
 
@@ -121,10 +129,59 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 		logger.info("Processing each individual AvlReport...");
 		IntervalTimer timer = new IntervalTimer();
 		
+		Map<String, Shape> shapes=new HashMap<String, Shape>();
+		
 		// For each entity/vehicle process the data
 		int counter = 0;
+		
+		for (FeedEntity entity : message.getEntityList()) 
+		{
+			if(entity.hasShape())
+			{
+				Shape shape = entity.getShape();
+				
+				if(!shapes.containsKey(shape.getShapeId()))
+				{
+					shapes.put(shape.getShapeId(), shape);
+				}
+			}
+		}
 		for (FeedEntity entity : message.getEntityList()) {
-			// If no vehicles in the entity then nothing to process 
+			// If no vehicles in the entity then nothing to process							
+			if(entity.hasTripUpdate())
+			{
+				TripUpdate tripUpdate = entity.getTripUpdate();
+				if(tripUpdate.hasTripProperties())
+				{
+					TripProperties tripProperties = tripUpdate.getTripProperties();
+					if(tripProperties.hasShapeId())
+					{												
+						if(shapes.containsKey(tripProperties.getShapeId()))
+						{
+							Shape shape = shapes.get(tripProperties.getShapeId());
+																												
+							Diversion detour=new Diversion();
+							detour.setShapeId(tripProperties.getShapeId());
+							detour.setTripId(tripUpdate.getTrip().getTripId());
+							detour.setRouteId(tripUpdate.getTrip().getRouteId());
+													
+							DiversionStopPath diversionStopPath=new DiversionStopPath();							
+							for(ShapePoint shapePoint : shape.getShapePointList())
+							{
+								Location location=new Location(shapePoint.getShapePtLat(), shapePoint.getShapePtLon());
+								diversionStopPath.getPath().add(location);
+							}						
+							detour.getDiversionStopPaths().add(diversionStopPath);
+																	
+							if(DiversionsCacheFactory.getInstance()!=null)
+								DiversionsCacheFactory.getInstance().putDiversion(detour);
+							
+							logger.debug("Have found shape update to process.",tripUpdate.toString());
+						}							
+					}					
+				}								
+			}
+			
 			if (!entity.hasVehicle())
 				continue;
 			
@@ -263,6 +320,7 @@ public abstract class GtfsRtVehiclePositionsReaderBase {
 			// it never seemed to complete, even for just a single call to
 			// parseFrom(). Therefore loading in entire file at once.
 			FeedMessage feed = FeedMessage.parseFrom(codedStream);
+			
 			logger.info("Parsing GTFS-realtime file into a FeedMessage took " +
 					"{} msec", timer.elapsedMsec());
 			

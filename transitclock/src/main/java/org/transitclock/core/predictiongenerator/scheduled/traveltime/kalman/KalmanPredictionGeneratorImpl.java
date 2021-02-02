@@ -15,6 +15,7 @@ import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.HeadwayDetails;
 import org.transitclock.core.Indices;
 import org.transitclock.core.PredictionGeneratorDefaultImpl;
+import org.transitclock.core.RouteMatch;
 import org.transitclock.core.SpatialMatch;
 import org.transitclock.core.TemporalDifference;
 import org.transitclock.core.TravelTimeDetails;
@@ -227,7 +228,7 @@ public class KalmanPredictionGeneratorImpl extends PredictionGeneratorDefaultImp
 	}
 
 	@Override
-	public long expectedTravelTimeFromMatchToEndOfStopPath(AvlReport avlReport, SpatialMatch match) {
+	public long expectedTravelTimeFromMatchToEndOfStopPath(AvlReport avlReport, RouteMatch match) {
 		
 		if(useKalmanForPartialStopPaths.getValue().booleanValue())
 		{		

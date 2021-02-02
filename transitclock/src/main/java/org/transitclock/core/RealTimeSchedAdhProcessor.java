@@ -134,7 +134,7 @@ public class RealTimeSchedAdhProcessor {
 		// at the next stop with a scheduled time. Determine the 
 		// appropriate match to use for the upcoming stop where there is a 
 		// schedule time.		
-		SpatialMatch matchAtStopWithScheduleTime = 
+		RouteMatch matchAtStopWithScheduleTime = 
 				match.getMatchAtNextStopWithScheduleTime();
 		if (matchAtStopWithScheduleTime == null)
 			return null;

@@ -82,7 +82,7 @@ public class TemporalMatcher {
 	 *         difference is beyond the allowable bounds.
 	 */
 	private static TemporalDifference determineHowFarOffScheduledTime(
-			String vehicleId, Date date, SpatialMatch spatialMatch,
+			String vehicleId, Date date, RouteMatch spatialMatch,
 			boolean isFirstSpatialMatch) {
 
 	  // check to see if we are frequency based
@@ -95,7 +95,7 @@ public class TemporalMatcher {
 		// Determine how long it should take to travel along trip to the match. 
 		// Can add this time to the trip scheduled start time to determine
 		// when the vehicle is predicted to be at the match. 
-		SpatialMatch beginningOfTrip = new SpatialMatch(
+		RouteMatch beginningOfTrip = new RouteMatch(
 				0,    // AVL time doesn't matter
 				spatialMatch.getBlock(), 
 				spatialMatch.getTripIndex(), 
@@ -177,7 +177,7 @@ public class TemporalMatcher {
 	 * @return
 	 */
 	private TemporalDifference temporalDifferenceForSpecialLayover(VehicleState vehicleState,
-			SpatialMatch spatialMatch, int expectedTravelTimeMsec) {
+			RouteMatch spatialMatch, int expectedTravelTimeMsec) {
 		AvlReport avlReport = vehicleState.getAvlReport();
 		Date avlTime = avlReport.getDate();
 
@@ -240,7 +240,7 @@ public class TemporalMatcher {
 	 * @return True if current temporal match is better and should be used
 	 */
 	private static boolean currentMatchIsBetter(
-			TemporalMatch bestTemporalMatchSoFar, SpatialMatch currentSpatialMatch,
+			TemporalMatch bestTemporalMatchSoFar, RouteMatch currentSpatialMatch,
 			TemporalDifference differenceFromExpectedTime) {
 		// If there is no current match then it can't be better
 		if (currentSpatialMatch == null || differenceFromExpectedTime == null)
@@ -307,9 +307,9 @@ public class TemporalMatcher {
 	 * @return true if it is a problematic layover match that should not be used
 	 */
 	private boolean isProblematicLayover(VehicleState vehicleState,
-			List<SpatialMatch> spatialMatches, int matchIdx) {
-		SpatialMatch previousMatch = vehicleState.getMatch();
-		SpatialMatch spatialMatch = spatialMatches.get(matchIdx);
+			List<RouteMatch> spatialMatches, int matchIdx) {
+		RouteMatch previousMatch = vehicleState.getMatch();
+		RouteMatch spatialMatch = spatialMatches.get(matchIdx);
 		
 		// If not even a layover then false
 		if (!previousMatch.isLayover())
@@ -355,13 +355,14 @@ public class TemporalMatcher {
 	 * 
 	 * @param vehicleState
 	 * @param spatialMatches
+	 * @param divesionMatches 
 	 * @return The best temporal match for the spatial matches passed in. If no
 	 *         valid temporal match found then returns null.
 	 */
 	public TemporalMatch getBestTemporalMatch(VehicleState vehicleState,
-			List<SpatialMatch> spatialMatches) {
+			List<RouteMatch> spatialMatches, List<DiversionMatch> divesionMatches) {
 		// Convenience variables		
-		SpatialMatch previousMatch = vehicleState.getMatch();
+		RouteMatch previousMatch = vehicleState.getMatch();
 		Date previousAvlTime =
 				vehicleState.getPreviousAvlReportFromSuccessfulMatch().getDate();
 		AvlReport avlReport = vehicleState.getAvlReport();
@@ -378,7 +379,7 @@ public class TemporalMatcher {
 		// Find best temporal match of the spatial matches
 		TemporalMatch bestTemporalMatchSoFar = null;
 		for (int matchIdx = 0; matchIdx < spatialMatches.size(); ++matchIdx) {
-			SpatialMatch spatialMatch = spatialMatches.get(matchIdx);
+			RouteMatch spatialMatch = spatialMatches.get(matchIdx);
 			logger.debug("Examining spatial match {}", spatialMatch);
 			
 			// There is a complication with vehicles leaving a layover slightly 
@@ -522,9 +523,9 @@ public class TemporalMatcher {
 	 *         should be. Returns null if no adequate temporal match.
 	 */
 	public TemporalMatch getBestTemporalMatchComparedToSchedule(
-			AvlReport avlReport, List<SpatialMatch> spatialMatches) {
+			AvlReport avlReport, List<RouteMatch> spatialMatches) {
 		TemporalDifference bestDifferenceFromExpectedTime = null;
-		SpatialMatch bestSpatialMatch = null;
+		RouteMatch bestSpatialMatch = null;
 		
 		
 		logger.debug("getBestTemporalMatchComparedToSchedule has spatialMatches {}", spatialMatches);
@@ -536,7 +537,7 @@ public class TemporalMatcher {
     }
 		
 		for (int i=0; i<spatialMatches.size(); ++i) {	
-			SpatialMatch spatialMatch = spatialMatches.get(i);
+			RouteMatch spatialMatch = spatialMatches.get(i);
 			
 			// If not at wait stop then determine temporal match based on 
 			// how long it should take vehicle to travel from the beginning

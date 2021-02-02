@@ -56,6 +56,7 @@ import org.transitclock.gtfs.DbConfig;
 import org.transitclock.ipc.servers.CacheQueryServer;
 import org.transitclock.ipc.servers.CommandsServer;
 import org.transitclock.ipc.servers.ConfigServer;
+import org.transitclock.ipc.servers.DiversionsServer;
 import org.transitclock.ipc.servers.HoldingTimeServer;
 import org.transitclock.ipc.servers.PredictionAnalysisServer;
 import org.transitclock.ipc.servers.PredictionsServer;
@@ -409,6 +410,7 @@ public class Core {
 		CacheQueryServer.start(agencyId);
 		PredictionAnalysisServer.start(agencyId);
 		HoldingTimeServer.start(agencyId);
+		DiversionsServer.start(agencyId);
 	}
 	
 	static private void populateCaches() throws Exception

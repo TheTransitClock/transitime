@@ -171,8 +171,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 * @param avlReport
 	 * @return
 	 */
-	private boolean tooManyStopsTraversed(SpatialMatch oldMatch,
-			SpatialMatch newMatch, AvlReport previousAvlReport,
+	private boolean tooManyStopsTraversed(RouteMatch oldMatch,
+			RouteMatch newMatch, AvlReport previousAvlReport,
 			AvlReport avlReport) {
 		// If there is no old match then we are fine
 		if (oldMatch == null)
@@ -224,8 +224,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 *            The new match for the vehicle.
 	 * @return
 	 */
-	private boolean shouldProcessArrivedOrDepartedStops(SpatialMatch oldMatch,
-			SpatialMatch newMatch) {
+	private boolean shouldProcessArrivedOrDepartedStops(RouteMatch oldMatch,
+			RouteMatch newMatch) {
 		// If there is no old match at all then we likely finally got a
 		// AVL report after vehicle had left terminal. Still want to
 		// determine arrival/departure times for the first stops of the
@@ -239,7 +239,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		// truly know what is going on it is best to not generate
 		// arrivals/departures for between the matches.
 		int stopsTraversed =
-				SpatialMatch.numberStopsBetweenMatches(oldMatch, newMatch);
+				RouteMatch.numberStopsBetweenMatches(oldMatch, newMatch);
 		if (stopsTraversed > getMaxStopsBetweenMatches()) {
 			logger.error("Attempting to traverse {} stops between oldMatch " +
 					"and newMatch, which is more thanThere are more than " +
@@ -611,7 +611,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		}
 
 		// Couple of convenience variables
-		SpatialMatch newMatch = vehicleState.getMatch();
+		RouteMatch newMatch = vehicleState.getMatch();
 		String vehicleId = vehicleState.getVehicleId();
 
 		if (newMatch.getTripIndex() == 0 &&
@@ -624,7 +624,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			int stopPathIndex = 0;
 
 			// Determine departure time for first stop of trip
-			SpatialMatch beginningOfTrip = new SpatialMatch(0, block,
+			RouteMatch beginningOfTrip = new RouteMatch(0, block,
 					tripIndex, 0, 0, 0.0, 0.0);
 			long travelTimeFromFirstStopToMatch = TravelTimes.getInstance()
 					.expectedTravelTimeBetweenMatches(vehicleId, avlReportTime,
@@ -799,7 +799,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 
 		// If vehicle wasn't departing a stop then simply return the
 		// previous AVL time as the beginTime.
-		SpatialMatch oldMatch = vehicleState.getPreviousMatch();
+		RouteMatch oldMatch = vehicleState.getPreviousMatch();
 		VehicleAtStopInfo oldVehicleAtStopInfo = oldMatch.getAtStop();
 		AvlReport previousAvlReport =
 				vehicleState.getPreviousAvlReportFromSuccessfulMatch();
@@ -813,13 +813,13 @@ public class ArrivalDepartureGeneratorDefaultImpl
 
 		// Use match right at the departed stop. This way we are including the
 		// time it takes to get from the actual stop to the new match.
-		SpatialMatch matchJustAfterStop =
+		RouteMatch matchJustAfterStop =
 				oldMatch.getMatchAdjustedToBeginningOfPath();
 
 		// Determine departure info for the old stop by using the current
 		// AVL report and subtracting the expected travel time to get from
 		// there to the new match.
-		SpatialMatch newMatch = vehicleState.getMatch();
+		RouteMatch newMatch = vehicleState.getMatch();
 		int travelTimeToNewMatchMsec = TravelTimes.getInstance()
 				.expectedTravelTimeBetweenMatches(vehicleId,
 						previousAvlReport.getDate(), matchJustAfterStop,
@@ -846,7 +846,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		} else {
 			// The oldMatch is before the stop so add the travel time from the
 			// oldMatch to the stop to the previous AVL report time.
-			SpatialMatch matchJustBeforeStop =
+			RouteMatch matchJustBeforeStop =
 					oldMatch.getMatchAdjustedToEndOfPath();
 			int travelTimeFromOldMatchToStopMsec = TravelTimes.getInstance()
 					.expectedTravelTimeBetweenMatches(vehicleId,
@@ -935,7 +935,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 
 		// If vehicle hasn't arrived at a stop then simply return the
 		// AVL time as the endTime.
-		SpatialMatch newMatch = vehicleState.getMatch();
+		RouteMatch newMatch = vehicleState.getMatch();
 		VehicleAtStopInfo newVehicleAtStopInfo = newMatch.getAtStop();
 		AvlReport avlReport = vehicleState.getAvlReport();
 		if (newVehicleAtStopInfo == null)
@@ -949,14 +949,14 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		// Use match right at the stop. This way we are including the
 		// time it takes to get from the new match to the actual
 		// stop and not just to some distance before the stop.
-		SpatialMatch matchJustBeforeStop =
+		RouteMatch matchJustBeforeStop =
 				newMatch.getMatchAdjustedToEndOfPath();
 
 		// Determine arrival info for the new stop based on the
 		// old AVL report. This will give us the proper time if
 		// the vehicle already arrived before the current AVL
 		// report
-		SpatialMatch oldMatch = vehicleState.getPreviousMatch();
+		RouteMatch oldMatch = vehicleState.getPreviousMatch();
 		int travelTimeFromOldMatchMsec = TravelTimes.getInstance()
 				.expectedTravelTimeBetweenMatches(vehicleId,
 						avlReport.getDate(), oldMatch, matchJustBeforeStop);
@@ -985,7 +985,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			// The new match is after the stop so subtract the travel time
 			// from the stop to the match from the AVL time to get the
 			// arrivalTimeBasedOnNewMatch.
-			SpatialMatch matchJustAfterStop =
+			RouteMatch matchJustAfterStop =
 					newMatch.getMatchAdjustedToBeginningOfPath();
 
 			int travelTimeFromStoptoNewMatchMsec = TravelTimes.getInstance()
@@ -1077,8 +1077,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 	 * @param newMatch
 	 * @return Number of zero travel or stop times
 	 */
-	private int numberOfZeroTravelOrStopTimes(SpatialMatch oldMatch,
-			SpatialMatch newMatch) {
+	private int numberOfZeroTravelOrStopTimes(RouteMatch oldMatch,
+			RouteMatch newMatch) {
 		int counter = 0;
 		Indices indices = oldMatch.getIndices();
 		Indices newIndices = newMatch.getIndices();
@@ -1123,8 +1123,8 @@ public class ArrivalDepartureGeneratorDefaultImpl
 
 		// Convenience variables
 		String vehicleId = vehicleState.getVehicleId();
-		SpatialMatch oldMatch = vehicleState.getPreviousMatch();
-		SpatialMatch newMatch = vehicleState.getMatch();
+		RouteMatch oldMatch = vehicleState.getPreviousMatch();
+		RouteMatch newMatch = vehicleState.getMatch();
 		Date previousAvlDate = vehicleState
 				.getPreviousAvlReportFromSuccessfulMatch().getDate();
 		Date avlDate = vehicleState.getAvlReport().getDate();
@@ -1173,7 +1173,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 						newVehicleAtStopInfo.clone() : newMatch.getIndices();
 
 		// Determine time to first stop
-		SpatialMatch matchAtNextStop = oldMatch.getMatchAtJustBeforeNextStop();
+		RouteMatch matchAtNextStop = oldMatch.getMatchAtJustBeforeNextStop();
 		long travelTimeToFirstStop = TravelTimes.getInstance()
 				.expectedTravelTimeBetweenMatches(vehicleId,
 						avlDate, oldMatch, matchAtNextStop);
@@ -1250,7 +1250,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 			// Return empty arrivalDepartures list
 			return;
 		}
-		SpatialMatch newMatch = vehicleState.getMatch();
+		RouteMatch newMatch = vehicleState.getMatch();
 		if (newMatch == null) {
 			logger.error("Vehicle was not matched when trying to process " +
 					"arrival/departure times. {}", vehicleState);
@@ -1264,7 +1264,7 @@ public class ArrivalDepartureGeneratorDefaultImpl
 		// stop of the block due to not getting assignment right away or some
 		// kind of AVL issue. For this situation still want to estimate the
 		// arrival/departure times for the previous stops.
-		SpatialMatch oldMatch = vehicleState.getPreviousMatch();
+		RouteMatch oldMatch = vehicleState.getPreviousMatch();
 		if (oldMatch == null) {
 			logger.debug("For vehicleId={} there was no previous match " +
 					"so seeing if can generate arrivals/departures for " +

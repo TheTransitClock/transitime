@@ -17,6 +17,8 @@
 
 package org.transitclock.api.data;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -36,7 +38,12 @@ import org.transitclock.utils.MathUtils;
  *
  */
 @XmlTransient
-public class ApiTransientLocation {
+public class ApiTransientLocation implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1997973510120089077L;
 
 	@XmlAttribute
 	private double lat;
@@ -63,4 +70,13 @@ public class ApiTransientLocation {
 		// Output only 5 digits past decimal point
 		this.lon = MathUtils.round(latLon.getLon(), 5);
 	}
+
+	public double getLat() {
+		return lat;
+	}
+
+	public double getLon() {
+		return lon;
+	}
+	
 }

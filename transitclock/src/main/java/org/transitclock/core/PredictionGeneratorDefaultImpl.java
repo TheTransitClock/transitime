@@ -31,6 +31,10 @@ import org.transitclock.config.LongConfigValue;
 import org.transitclock.core.dataCache.HoldingTimeCache;
 import org.transitclock.core.dataCache.StopPathPredictionCache;
 import org.transitclock.core.dataCache.VehicleStateManager;
+
+import org.transitclock.core.diversion.cache.DiversionsCacheFactory;
+import org.transitclock.core.diversion.cache.DiversionsKey;
+import org.transitclock.core.diversion.cache.DiversionsList;
 import org.transitclock.core.holdingmethod.HoldingTimeGeneratorFactory;
 import org.transitclock.core.predictiongenerator.PredictionComponentElementsGenerator;
 import org.transitclock.core.predictiongenerator.bias.BiasAdjuster;
@@ -332,7 +336,17 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 			}
 		}			
 	}
-		
+
+	private boolean isDiverted(Indices indices, DiversionsList diversions) {
+		if(diversions==null)
+			return false;
+		for( org.transitclock.core.diversion.model.Diversion diversion:diversions.getDiversions())
+		{
+			if(indices.getStopPath().getGtfsStopSeq()>=diversion.getStartStopSeq() && indices.getStopPath().getGtfsStopSeq()<=diversion.getReturnStopSeq())
+				return true;
+		}
+		return false;
+	}
 	/**
 	 * Generates the predictions for the vehicle. 
 	 * 
@@ -401,9 +415,16 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 
 		// Continue through block until end of block or limit on how far
 		// into the future should generate predictions reached.
+		
+		// Stop generating predictions if we reach a diversion.
+		DiversionsList diversions=null;
+		if(DiversionsCacheFactory.getInstance()!=null)				
+			diversions = DiversionsCacheFactory.getInstance().getDiversions(new DiversionsKey(match.getTrip().getId(), match.getRoute().getId()));
+								
 		while (schedBasedPreds
 				|| predictionTime < 
-					avlTime + maxPredictionsTimeSecs.getValue() * Time.MS_PER_SEC) {
+					avlTime + maxPredictionsTimeSecs.getValue() * Time.MS_PER_SEC 
+					|| !isDiverted(indices, diversions)) {
 			// Keep track of whether prediction is affected by layover 
 			// scheduled departure time since those predictions might not
 			// be a accurate. Once a layover encountered then all subsequent
@@ -565,6 +586,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 	}
 	
 
+
 	public long getTravelTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState)
 	{
 		//logger.debug("Using transiTime default algorithm for travel time prediction : " + indices + " Value: "+indices.getTravelTimeForPath());
@@ -584,7 +606,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 		return prediction;		
 	}
 	
-	public long expectedTravelTimeFromMatchToEndOfStopPath(AvlReport avlReport, SpatialMatch match)
+	public long expectedTravelTimeFromMatchToEndOfStopPath(AvlReport avlReport, RouteMatch match)
 	{
 		TravelTimes travelTimes = TravelTimes.getInstance();
 		return travelTimes.expectedTravelTimeFromMatchToEndOfStopPath(match);

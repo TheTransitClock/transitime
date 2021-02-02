@@ -12,6 +12,7 @@ import org.transitclock.config.BooleanConfigValue;
 import org.transitclock.config.DoubleConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.Indices;
+import org.transitclock.core.RouteMatch;
 import org.transitclock.core.SpatialMatch;
 import org.transitclock.core.TravelTimeDetails;
 import org.transitclock.core.VehicleState;
@@ -211,7 +212,7 @@ public class KalmanPredictionGeneratorImpl extends HistoricalAveragePredictionGe
 	}
 
 	@Override
-	public long expectedTravelTimeFromMatchToEndOfStopPath(AvlReport avlReport, SpatialMatch match) {
+	public long expectedTravelTimeFromMatchToEndOfStopPath(AvlReport avlReport, RouteMatch match) {
 		
 		if(useKalmanForPartialStopPaths.getValue().booleanValue())
 		{		

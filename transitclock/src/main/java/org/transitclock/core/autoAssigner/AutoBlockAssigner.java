@@ -31,7 +31,7 @@ import org.transitclock.config.DoubleConfigValue;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.configData.CoreConfig;
 import org.transitclock.core.BlocksInfo;
-import org.transitclock.core.SpatialMatch;
+import org.transitclock.core.RouteMatch;
 import org.transitclock.core.SpatialMatcher;
 import org.transitclock.core.TemporalDifference;
 import org.transitclock.core.TemporalMatch;
@@ -76,8 +76,8 @@ public class AutoBlockAssigner {
 	// Contains the results of spatial matching the avl report to the 
 	// specified trip pattern. Keyed on trip pattern ID. Note: since the spatial 
 	// matches are cached and reused the block member will not be correct
-	private Map<String, SpatialMatch> spatialMatchCache = 
-			new HashMap<String, SpatialMatch>();
+	private Map<String, RouteMatch> spatialMatchCache = 
+			new HashMap<String, RouteMatch>();
 	
 	/****************************** Config params **********************/
 	
@@ -252,7 +252,7 @@ public class AutoBlockAssigner {
 		// is only for use with no schedule assignments.
 		AvlReport avlReport = getAvlReport();
 		List<Trip> potentialTrips = block.getTripsCurrentlyActive(avlReport);
-		List<SpatialMatch> spatialMatches = SpatialMatcher
+		List<RouteMatch> spatialMatches = SpatialMatcher
 				.getSpatialMatchesForAutoAssigning(getAvlReport(),
 						block, potentialTrips);
 		if (spatialMatches.isEmpty())
@@ -261,7 +261,7 @@ public class AutoBlockAssigner {
 		// Determine all possible spatial matches for the previous AVL report so
 		// that can make sure that it too matches the assignment.
 		AvlReport previousAvlReport = getPreviousAvlReport();
-		List<SpatialMatch> prevSpatialMatches = SpatialMatcher
+		List<RouteMatch> prevSpatialMatches = SpatialMatcher
 				.getSpatialMatchesForAutoAssigning(previousAvlReport,
 						block, potentialTrips);
 		if (prevSpatialMatches.isEmpty())
@@ -278,9 +278,9 @@ public class AutoBlockAssigner {
 		// the previous AVL report. Find one where the expected travel time
 		// closely matches the time between the AVL reports.
 		TemporalDifference bestTemporalDifference = null;
-		SpatialMatch bestSpatialMatch = null;
-		for (SpatialMatch prevSpatialMatch : prevSpatialMatches) {
-			for (SpatialMatch spatialMatch : spatialMatches) {
+		RouteMatch bestSpatialMatch = null;
+		for (RouteMatch prevSpatialMatch : prevSpatialMatches) {
+			for (RouteMatch spatialMatch : spatialMatches) {
 				// Determine according to the historic travel times how long
 				// it was expected to take to travel from the previous match
 				// to the current one.
@@ -334,13 +334,13 @@ public class AutoBlockAssigner {
 	 * 
 	 * @return All possible spatial matches
 	 */
-	private List<SpatialMatch> getSpatialMatches(AvlReport avlReport,
+	private List<RouteMatch> getSpatialMatches(AvlReport avlReport,
 			Block block) {
 		// Convenience variable
 		String vehicleId = avlReport.getVehicleId();
 		
 		// For returning results of this method
-		List<SpatialMatch> spatialMatches = new ArrayList<SpatialMatch>();
+		List<RouteMatch> spatialMatches = new ArrayList<RouteMatch>();
 		
 		// Determine which trips are currently active so that don't bother 
 		// looking at all trips
@@ -367,7 +367,7 @@ public class AutoBlockAssigner {
 			if (spatialMatchCache.containsKey(tripPatternId)) {
 				// Already processed this trip pattern so use cached results. 
 				// Can be null
-				SpatialMatch previouslyFoundMatch =
+				RouteMatch previouslyFoundMatch =
 						spatialMatchCache.get(tripPatternId);
 
 				// If there actually was a successful spatial match to the 
@@ -376,8 +376,8 @@ public class AutoBlockAssigner {
 					// The cached match has the wrong trip info so need  
 					// to create an equivalent match with the proper trip block 
 					// info
-					SpatialMatch matchWithProperBlock =
-							new SpatialMatch(previouslyFoundMatch, trip);
+					RouteMatch matchWithProperBlock =
+							new RouteMatch(previouslyFoundMatch, trip);
 					
 					// Add to list of spatial matches to return
 					spatialMatches.add(matchWithProperBlock);
@@ -408,13 +408,13 @@ public class AutoBlockAssigner {
 		// spatial matches that are not layovers. If match is to a layover can 
 		// ignore it since layover matches are far too flexible to really be 
 		// considered a spatial match
-		List<SpatialMatch> newSpatialMatches = SpatialMatcher
+		List<RouteMatch> newSpatialMatches = SpatialMatcher
 				.getSpatialMatchesForAutoAssigning(avlReport,
 						block, tripsNeedToInvestigate);
 		
 		// Add newly discovered matches to the cache and to the list of spatial
 		// matches to be returned
-		for (SpatialMatch newSpatialMatch : newSpatialMatches) {
+		for (RouteMatch newSpatialMatch : newSpatialMatches) {
 			logger.debug("For vehicleId={} for tripId={} with "
 						+ "tripPatternId={} found new spatial match {}.",
 						vehicleId, newSpatialMatch.getTrip().getId(), 
@@ -440,7 +440,7 @@ public class AutoBlockAssigner {
 			// for the trip pattern
 			String tripPatternId = tripInvestigated.getTripPattern().getId();
 			boolean spatialMatchFound = false;
-			for (SpatialMatch newSpatialMatch : newSpatialMatches) {
+			for (RouteMatch newSpatialMatch : newSpatialMatches) {
 				String spatialMatchTripPatternId =
 						newSpatialMatch.getTrip().getTripPattern().getId();
 				if (spatialMatchTripPatternId.equals(tripPatternId)) {
@@ -477,14 +477,14 @@ public class AutoBlockAssigner {
 	 * 
 	 * @return list of spatial matches for the avlReport
 	 */
-	private List<SpatialMatch> getSpatialMatchesWithoutCache(
+	private List<RouteMatch> getSpatialMatchesWithoutCache(
 			AvlReport avlReport, Block block) {
 		// Determine which trips are currently active so that don't bother 
 		// looking at all trips
 		List<Trip> activeTrips = block.getTripsCurrentlyActive(avlReport);
 
 		// Get and return the spatial matches
-		List<SpatialMatch> spatialMatches = SpatialMatcher
+		List<RouteMatch> spatialMatches = SpatialMatcher
 				.getSpatialMatchesForAutoAssigning(avlReport,
 						block, activeTrips);
 		return spatialMatches;
@@ -512,7 +512,7 @@ public class AutoBlockAssigner {
 	private TemporalMatch bestTemporalMatch(AvlReport avlReport, Block block,
 			boolean useCache) {
 		// Determine all potential spatial matches for the block
-		List<SpatialMatch> spatialMatches = useCache ? 
+		List<RouteMatch> spatialMatches = useCache ? 
 			getSpatialMatches(avlReport, block) : 
 				getSpatialMatchesWithoutCache(avlReport, block);
 

@@ -18,6 +18,7 @@
 package org.transitclock.api.data;
 
 import org.transitclock.db.structs.Location;
+import org.transitclock.ipc.data.IpcLocation;
 
 /**
  * A simple latitude/longitude.
@@ -46,6 +47,9 @@ public class ApiLocation extends ApiTransientLocation {
 	}
 
 	public ApiLocation(Location loc) {
+		super(loc.getLat(), loc.getLon());
+	}
+	public ApiLocation(IpcLocation loc) {
 		super(loc.getLat(), loc.getLon());
 	}
 }

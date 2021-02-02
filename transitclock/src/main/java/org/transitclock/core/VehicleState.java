@@ -832,7 +832,7 @@ public class VehicleState {
 	 */
 	public float getPathHeading() {
 		// If vehicle not currently matched then there is no path heading
-		SpatialMatch match = getMatch();
+		RouteMatch match = getMatch();
 		if (match == null)
 			return Float.NaN;
 
@@ -863,7 +863,7 @@ public class VehicleState {
 	 */
 	private float getNextPathHeadingIfAtLayover() {
 		// If vehicle not currently matched then there is no path heading
-		SpatialMatch match = getMatch();
+		RouteMatch match = getMatch();
 		if (match == null)
 			return Float.NaN;
 

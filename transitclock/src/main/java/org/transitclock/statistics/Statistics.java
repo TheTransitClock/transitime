@@ -351,9 +351,9 @@ public class Statistics {
 	 * Just for testing
 	 */
 	public static void main(String args[]) {
-		Integer a[] = {56449, 45916, 33983, 1237582, 32739};
-		Statistics.filteredMean(Arrays.asList(a), 0.7);
-		
+		Integer a[] = {12, 41, 24, 5,10};
+		int filteredmean = Statistics.filteredMean(Arrays.asList(a), 0);
+		System.out.println("Filtered mean=" + filteredmean + " mean="+mean(Arrays.asList(a)));
 		Integer array[] = {2,4, 3};//, 4, 4, 4, 5, 5, 7, 9};
 		List<Integer> values = Arrays.asList(array); 
 		

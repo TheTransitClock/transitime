@@ -27,6 +27,7 @@ import org.transitclock.db.structs.CalendarDate;
 import org.transitclock.db.structs.ConfigRevision;
 import org.transitclock.db.structs.DbTest;
 import org.transitclock.db.structs.Departure;
+import org.transitclock.db.structs.Diversion;
 import org.transitclock.db.structs.FareAttribute;
 import org.transitclock.db.structs.FareRule;
 import org.transitclock.db.structs.Frequency;
@@ -107,6 +108,7 @@ public class AnnotatedClassesList {
 		VehicleState.class,
 		HoldingTime.class,
 		Headway.class,
+		Diversion.class,
 		// For website
 		ApiKey.class,
 		WebAgency.class,

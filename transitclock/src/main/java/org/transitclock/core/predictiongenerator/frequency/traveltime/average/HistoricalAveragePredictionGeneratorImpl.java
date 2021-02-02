@@ -9,7 +9,7 @@ import org.transitclock.applications.Core;
 import org.transitclock.config.IntegerConfigValue;
 import org.transitclock.core.Indices;
 import org.transitclock.core.PredictionGeneratorDefaultImpl;
-import org.transitclock.core.SpatialMatch;
+import org.transitclock.core.RouteMatch;
 import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.HistoricalAverage;
 import org.transitclock.core.dataCache.StopPathCacheKey;
@@ -85,7 +85,7 @@ LastVehiclePredictionGeneratorImpl implements PredictionComponentElementsGenerat
 	}	
 
 	@Override
-	public long expectedTravelTimeFromMatchToEndOfStopPath(AvlReport avlReport,SpatialMatch match) {
+	public long expectedTravelTimeFromMatchToEndOfStopPath(AvlReport avlReport,RouteMatch match) {
 				
 		Indices indices = match.getIndices();
 		Integer time=FrequencyBasedHistoricalAverageCache.secondsFromMidnight(new Date(match.getAvlTime()),2);

@@ -88,7 +88,7 @@ public class Indices implements Serializable {
 	 * 
 	 * @param spatialMatch
 	 */
-	public Indices(SpatialMatch spatialMatch) {
+	public Indices(RouteMatch spatialMatch) {
 		this.block = spatialMatch.getBlock();
 		this.tripIndex = spatialMatch.getTripIndex();
 		this.stopPathIndex = spatialMatch.getStopPathIndex();

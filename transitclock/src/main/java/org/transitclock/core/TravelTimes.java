@@ -110,12 +110,12 @@ public class TravelTimes {
 	 *         location. If there is no previous trip then returns 0.
 	 */
 	public static int travelTimeFromLayoverArrivalToNewLoc(
-			SpatialMatch spatialMatch, Location newLoc) {
+			RouteMatch spatialMatch, Location newLoc) {
 		if (!spatialMatch.isLayover())
 			return 0;
 		
 		// Determine the stop at the end of the previous trip
-		SpatialMatch matchAtPreviousStop = 
+		RouteMatch matchAtPreviousStop = 
 				spatialMatch.getMatchAtPreviousStop();
 		
 		// If there was no previous trip then return 0
@@ -228,7 +228,7 @@ public class TravelTimes {
 	 * @param match
 	 * @return TimeTravelInfo containing information on the match
 	 */
-	private TimeTravelInfo travelTimeInfoForPartialPath(SpatialMatch match) {
+	private TimeTravelInfo travelTimeInfoForPartialPath(RouteMatch match) {
 		// Get the travel times for this stop path
 		TravelTimesForStopPath travelTimesForStopPath = 
 				match.getTrip().getTravelTimesForStopPath(match.getStopPathIndex());
@@ -277,7 +277,7 @@ public class TravelTimes {
 	 *            The starting point
 	 * @return Expected travel time in msec
 	 */
-	public int expectedTravelTimeFromMatchToEndOfStopPath(SpatialMatch match) {
+	public int expectedTravelTimeFromMatchToEndOfStopPath(RouteMatch match) {
 	  StringBuffer sb = new StringBuffer();
 		// Get the travel times for this stop path
 		TravelTimesForStopPath travelTimesForStopPath = 
@@ -316,7 +316,7 @@ public class TravelTimes {
 	 *            The end point
 	 * @return Expected travel time in msec
 	 */
-	public int expectedTravelTimeFromBeginningOfStopPathToMatch(SpatialMatch match) {
+	public int expectedTravelTimeFromBeginningOfStopPathToMatch(RouteMatch match) {
 		// Get the travel times for this stop path
 		TravelTimesForStopPath travelTimesForStopPath = 
 				match.getTrip().getTravelTimesForStopPath(match.getStopPathIndex());
@@ -385,7 +385,7 @@ public class TravelTimes {
 	 *         before match1
 	 */
 	public int expectedTravelTimeBetweenMatches(String vehicleId,
-			int timeOfDaySecs, SpatialMatch match1, SpatialMatch match2) {
+			int timeOfDaySecs, RouteMatch match1, RouteMatch match2) {
 		logger.debug("For vehicleId={} determining travel time between " +
 				"following two matches: \n" +
 				"  match1={}\n" +
@@ -533,9 +533,29 @@ public class TravelTimes {
 	 *         before match1
 	 */
 	public int expectedTravelTimeBetweenMatches(String vehicleId,
-			Date time, SpatialMatch match1, SpatialMatch match2) {
+			Date time, RouteMatch match1, RouteMatch match2) {
 		int timeOfDaySecs = Core.getInstance().getTime().getSecondsIntoDay(time);
 		return expectedTravelTimeBetweenMatches(vehicleId, timeOfDaySecs, match1, match2);
+	}
+	
+	public int expectedTravelTimesBetweenMatches(String vehicleId, Date time, DiversionMatch match1, DiversionMatch match2)
+	{
+		
+		/* TODO Check if on same diversion */
+		
+		
+		
+		return 0;
+	}
+	
+	public int expectedTravelTimesBetweenMatches(String vehicleId, Date time, RouteMatch match1, DiversionMatch match2)
+	{
+		return 0;
+	}
+	
+	public int expectedTravelTimesBetweenMatches(String vehicleId, Date time, DiversionMatch match1, RouteMatch match2)
+	{
+		return 0;
 	}
 	
 }
