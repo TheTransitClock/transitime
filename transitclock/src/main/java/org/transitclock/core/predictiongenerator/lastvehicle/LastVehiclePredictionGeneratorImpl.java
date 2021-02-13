@@ -40,14 +40,7 @@ import org.transitclock.ipc.data.IpcVehicleComplete;
  */
 public class LastVehiclePredictionGeneratorImpl extends
 	PredictionGeneratorDefaultImpl implements PredictionComponentElementsGenerator {
-	@Override
-	protected IpcPrediction generatePredictionForStop(AvlReport avlReport,  Indices indices, long predictionTime,
-			boolean useArrivalTimes, boolean affectedByWaitStop, boolean isDelayed, boolean lateSoMarkAsUncertain,
-			int tripCounter, Integer scheduleDeviation) {
-		// TODO Auto-generated method stub
-		return super.generatePredictionForStop(avlReport,  indices, predictionTime, useArrivalTimes, affectedByWaitStop,
-				isDelayed, lateSoMarkAsUncertain, tripCounter, scheduleDeviation);
-	}
+
 	private String alternative="PredictionGeneratorDefaultImpl";
 				
 	private static final Logger logger = LoggerFactory

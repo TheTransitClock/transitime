@@ -506,11 +506,13 @@ public class ArrivalDepartureGeneratorDefaultImpl
 
 		/* add event to vehicle state. Will increment tripCounter if the last arrival in a trip */
 		VehicleState vehicleState = VehicleStateManager.getInstance().getVehicleState(arrivalDeparture.getVehicleId());
+		
+		vehicleState.setEvent(arrivalDeparture);
 
 		vehicleState.incrementTripCounter(arrivalDeparture);
 
 		// Generate prediction accuracy info as appropriate
-		PredictionAccuracyModule.handleArrivalDeparture(arrivalDeparture);
+		PredictionAccuracyModule.handleArrivalDeparture(arrivalDeparture, vehicleState);
 
 
 	}

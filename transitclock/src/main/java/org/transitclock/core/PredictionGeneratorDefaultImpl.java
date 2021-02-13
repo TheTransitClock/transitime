@@ -153,13 +153,17 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 	 *            Indicates that vehicle is late and now generating predictions
 	 *            for a subsequent trip. Use to indicate that the predictions
 	 *            are less certain.
+	 * @param predictedDwellTimeTotal 
+	 * @param predictedTravelTimeTotal 
+	 * @param predictedDwellTimeTotal2 
+	 * @param predictedTravelTimeTotal2 
 	 * @return The generated Prediction
 	 */
 	 protected IpcPrediction generatePredictionForStop(AvlReport avlReport,  
 			Indices indices, long predictionTime, boolean useArrivalTimes,
 			boolean affectedByWaitStop, boolean isDelayed,
 
-	  boolean lateSoMarkAsUncertain, int tripCounter, Integer scheduleDeviation) {	 
+	  boolean lateSoMarkAsUncertain, int tripCounter, Integer scheduleDeviation, long predictedTravelTime,  long predictedTravelTimeTotal, long predictedDwellTimeTotal) {	 
 
 		// Determine additional parameters for the prediction to be generated
 		
@@ -188,7 +192,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 			return new IpcPrediction(avlReport, stopId, gtfsStopSeq, trip, 
 					predictionTime,	predictionTime, indices.atEndOfTrip(),
 					affectedByWaitStop, isDelayed, lateSoMarkAsUncertain,
-					ArrivalOrDeparture.ARRIVAL, scheduleDeviation, freqStartTime, tripCounter,vehicleState.isCanceled());
+					ArrivalOrDeparture.ARRIVAL, scheduleDeviation, freqStartTime, tripCounter,vehicleState.isCanceled(),  0L, predictedTravelTime, predictedDwellTimeTotal, predictedTravelTimeTotal+predictedTravelTime);
 
 		} else {
 			
@@ -305,7 +309,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 							indices.atEndOfTrip(), affectedByWaitStop,
 							isDelayed, lateSoMarkAsUncertain,
 
-							ArrivalOrDeparture.DEPARTURE, scheduleDeviation, freqStartTime, tripCounter,vehicleState.isCanceled());
+							ArrivalOrDeparture.DEPARTURE, scheduleDeviation, freqStartTime, tripCounter,vehicleState.isCanceled(), predictionForUser-predictionTime, predictedTravelTime, predictedDwellTimeTotal+(predictionForUser-predictionTime), predictedTravelTimeTotal+predictedTravelTime);
 
 				} else {
 					// Use the expected departure times, possibly adjusted for 
@@ -315,7 +319,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 							indices.atEndOfTrip(), affectedByWaitStop,
 							isDelayed, lateSoMarkAsUncertain,
 
-							ArrivalOrDeparture.DEPARTURE, scheduleDeviation, freqStartTime, tripCounter,vehicleState.isCanceled());
+							ArrivalOrDeparture.DEPARTURE, scheduleDeviation, freqStartTime, tripCounter,vehicleState.isCanceled(), expectedDepartureTime-predictionTime,predictedTravelTime,predictedDwellTimeTotal+(expectedDepartureTime-predictionTime), predictedTravelTimeTotal+predictedTravelTime);
 
 				}
 			} else {
@@ -326,7 +330,7 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 						predictionTime + expectedStopTimeMsec, 
 						indices.atEndOfTrip(),
 						affectedByWaitStop, isDelayed, lateSoMarkAsUncertain,
-						ArrivalOrDeparture.DEPARTURE, scheduleDeviation, freqStartTime, tripCounter,vehicleState.isCanceled());
+						ArrivalOrDeparture.DEPARTURE, scheduleDeviation, freqStartTime, tripCounter,vehicleState.isCanceled(), expectedStopTimeMsec, predictedTravelTime, predictedDwellTimeTotal+(expectedStopTimeMsec), predictedTravelTimeTotal+predictedTravelTime);
 
 
 			}
@@ -373,8 +377,15 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 		
 		// Get time to end of first path and thereby determine prediction for 
 		// first stop.
+		long predictedTravelTime= expectedTravelTimeFromMatchToEndOfStopPath(avlReport, match);
 		
-		long predictionTime = avlTime + expectedTravelTimeFromMatchToEndOfStopPath(avlReport, match);
+		long predictionTime = avlTime + predictedTravelTime;
+		
+		long predictedTravelTimeTotal=0L;
+		
+		long predictedDwellTimeTotal=0L;
+		
+		long predictedDwellTime=0L;
 		
 		// Determine if vehicle is so late that predictions for subsequent 
 		// trips should be marked as uncertain given that another vehicle
@@ -401,6 +412,8 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 
 		// Continue through block until end of block or limit on how far
 		// into the future should generate predictions reached.
+		IpcPrediction previousPrediction=null;
+		
 		while (schedBasedPreds
 				|| predictionTime < 
 					avlTime + maxPredictionsTimeSecs.getValue() * Time.MS_PER_SEC) {
@@ -424,10 +437,13 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 							
 			// Determine the new prediction
 			IpcPrediction predictionForStop = generatePredictionForStop(avlReport,
-					indices, predictionTime,
+					indices, predictionTime, 
 					useArrivalPreds, affectedByWaitStop, 
-					vehicleState.isDelayed(), lateSoMarkAsUncertain, tripCounter, delay);
+					vehicleState.isDelayed(), lateSoMarkAsUncertain, tripCounter, delay, predictedTravelTime, predictedTravelTimeTotal, predictedDwellTimeTotal);
 												
+			predictedDwellTimeTotal=predictionForStop.getTotalPredictedDwellTime();
+			predictedTravelTimeTotal=predictionForStop.getTotalPredictedTravelTime();
+			
 			
 			if((predictionForStop.getPredictionTime()-Core.getInstance().getSystemTime())<generateHoldingTimeWhenPredictionWithin.getValue() &&
 					(predictionForStop.getPredictionTime()-Core.getInstance().getSystemTime())>0)
@@ -518,10 +534,18 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 			// getActualPredictionTime() instead of getPredictionTime() to
 			// handle situations where want to display to the user for wait 
 			// stops schedule times instead of the calculated prediction time.
-			predictionTime = predictionForStop.getActualPredictionTime();			
+			long actualPredictionTime = predictionForStop.getActualPredictionTime();						
+			
+			if(predictedDwellTimeTotal<0&&predictedDwellTime<0)
+				logger.error("Total dwell is less than zero.");
+			
+			predictionTime = actualPredictionTime;
+			
 			if (predictionForStop.isArrival())
-			{					
-				predictionTime += getStopTimeForPath(indices, avlReport, vehicleState);
+			{					 				
+				
+				predictionTime += getStopTimeForPath(indices, avlReport, vehicleState);;
+				
 				/* TODO this is where we should take account of holding time */
 				if(useHoldingTimeInPrediction.getValue() && HoldingTimeGeneratorFactory.getInstance()!=null)
 				{
@@ -538,6 +562,10 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 					
 				}
 			}
+			
+			if(predictedDwellTime>0)
+				logger.info("These should be mostly over 0");
+			
 			indices.incrementStopPath(predictionTime);						
 			// If reached end of block then done
 			if (indices.pastEndOfBlock(predictionTime)) {
@@ -549,9 +577,18 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 			boolean isCircuitRoute=true;
 			// Add in travel time for the next path to get to predicted 
 			// arrival time of this stop
-			if (!lastStopOfNonSchedBasedTrip && isCircuitRoute) {
-				predictionTime += getTravelTimeForPath(indices, avlReport, vehicleState);
-			}					
+			if (!lastStopOfNonSchedBasedTrip && isCircuitRoute) {				
+				predictedTravelTime= getTravelTimeForPath(indices, avlReport, vehicleState);
+				
+				predictionTime += predictedTravelTime;
+			}
+			
+			//predictedTravelTimeTotal=predictedTravelTimeTotal+predictedTravelTime;
+			
+			if(predictedTravelTime>0)
+				logger.info("These should be mostly over 0");
+				
+		
 		}
 		
 		for(IpcPrediction prediction : filteredPredictions.values()){
@@ -563,6 +600,8 @@ public class PredictionGeneratorDefaultImpl extends PredictionGenerator implemen
 		// Return the results
 		return newPredictions;
 	}
+	
+
 	
 
 	public long getTravelTimeForPath(Indices indices, AvlReport avlReport, VehicleState vehicleState)

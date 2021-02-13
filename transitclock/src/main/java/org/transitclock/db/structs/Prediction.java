@@ -98,7 +98,18 @@ public class Prediction implements Serializable {
 
     @Column
     private final int gtfsStopSeq;
+    
+    @Column 
+    private final Long predictedDwellTime;
+    
+    @Column 
+    private final Long predictedTravelTime;
+    
+    @Column 
+    private final Long predictedDwellTimeTotal;
 	
+    @Column 
+    private final Long predictedTravelTimeTotal;
 	// Needed because Hibernate objects must be serializable
 	private static final long serialVersionUID = 3966430062434375435L;
 
@@ -120,7 +131,7 @@ public class Prediction implements Serializable {
 	public Prediction(long predictionTime, long avlTime, long creationTime, 
 			String vehicleId, String stopId, String tripId, String routeId, 
 			boolean affectedByWaitStop, boolean isArrival, boolean schedBasedPred,
-            int gtfsStopSeq) {
+            int gtfsStopSeq, long predictedDwellTime, long predictedTravelTime, long predictedDwellTimeTotal, long predictedTravelTimeTotal) {
 		this.configRev = Core.getInstance().getDbConfig().getConfigRev();
 		this.predictionTime = new Date(predictionTime);
 		this.avlTime = new Date(avlTime);
@@ -132,7 +143,11 @@ public class Prediction implements Serializable {
 		this.affectedByWaitStop = affectedByWaitStop;
 		this.isArrival = isArrival;
 		this.schedBasedPred = schedBasedPred;
-     this.gtfsStopSeq = gtfsStopSeq;
+		this.gtfsStopSeq = gtfsStopSeq;
+		this.predictedDwellTime=predictedDwellTime;
+		this.predictedTravelTime=predictedTravelTime;
+		this.predictedDwellTimeTotal=predictedDwellTimeTotal;
+		this.predictedTravelTimeTotal=predictedTravelTimeTotal;
 	}
 	
 	public Prediction(IpcPrediction prediction) {
@@ -147,7 +162,11 @@ public class Prediction implements Serializable {
 		this.affectedByWaitStop = prediction.isAffectedByWaitStop();
 		this.isArrival = prediction.isArrival();
 		this.schedBasedPred = prediction.isSchedBasedPred();
-    this.gtfsStopSeq = prediction.getGtfsStopSeq();
+		this.gtfsStopSeq = prediction.getGtfsStopSeq();
+		this.predictedDwellTime=prediction.getPredictedDwellTime();
+		this.predictedTravelTime=prediction.getPredictedTravelTime();
+		this.predictedDwellTimeTotal=prediction.getTotalPredictedDwellTime();
+		this.predictedTravelTimeTotal=prediction.getTotalPredictedTravelTime();
 	}
 	
 	/**
@@ -167,6 +186,11 @@ public class Prediction implements Serializable {
 		this.isArrival = false;
 		this.schedBasedPred= false;
     this.gtfsStopSeq = -1;
+    	this.predictedDwellTime=null;
+    	this.predictedTravelTime=null;
+    	this.predictedDwellTimeTotal=null;
+    	this.predictedTravelTimeTotal=null;
+    	
 	}
 
 	/**
@@ -255,22 +279,7 @@ public class Prediction implements Serializable {
 		return true;
 	}
 
-	@Override
-	public String toString() {
-		return "Prediction [" 
-				+ "predictionTime=" + predictionTime
-				+ ", avlTime=" + avlTime
-				+ ", creationTime=" + creationTime 
-				+ ", vehicleId=" + vehicleId
-				+ ", stopId=" + stopId 
-				+ ", tripId=" + tripId 
-				+ ", routeId=" + routeId 
-				+ ", affectedByWaitStop=" + affectedByWaitStop
-				+ ", isArrival=" + isArrival
-				+ ", schedBasedPred=" + schedBasedPred
-				+ "]";
-	}
-
+	
 	public Date getPredictionTime() {
 		return predictionTime;
 	}
@@ -314,4 +323,21 @@ public class Prediction implements Serializable {
 	public int getGtfsStopSeq() {
 		return gtfsStopSeq;
 	}
+
+	public Long getPredictedDwellTimeTotal() {
+		return predictedDwellTimeTotal;
+	}
+
+	public Long getPredictedTravelTimeTotal() {
+		return predictedTravelTimeTotal;
+	}
+
+	public Long getPredictedDwellTime() {
+		return predictedDwellTime;
+	}
+
+	public Long getPredictedTravelTime() {
+		return predictedTravelTime;
+	}
+	
 }

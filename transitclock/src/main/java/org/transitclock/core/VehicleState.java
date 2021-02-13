@@ -101,6 +101,7 @@ public class VehicleState {
 	//Used for schedPred AVL. Identify if trip is canceled.
 	private boolean isCanceled;
 
+	private LinkedList<ArrivalDeparture>  eventHistory= new  LinkedList<ArrivalDeparture> ();
 
 	public Headway getHeadway() {
 		return headway;
@@ -245,7 +246,38 @@ public class VehicleState {
 			temporalMatchHistory.removeLast();
 		}
 	}
-
+	/**
+	 * Return the last event.
+	 * @return
+	 */
+	public ArrivalDeparture getEvent()
+	{
+		try {
+			return eventHistory.getFirst();
+		} catch (NoSuchElementException e) {
+			return null;
+		}
+	}
+	/**
+	 * 
+	 * @param event The event you want to find the preceding event for.
+	 * Return event for this vehicle that happened just before the one passed in.
+	 * @return
+	 */
+	public ArrivalDeparture getPreviousEvent(ArrivalDeparture event)
+	{					
+		for(ArrivalDeparture currentEvent:eventHistory)
+		{
+			// Events are store in order with the the latest first.
+			if(!currentEvent.equals(event) && currentEvent.getTime()<event.getTime())					
+			{
+				return currentEvent;
+			}					
+		}		
+		return null;
+	}
+	
+	
 	/**
 	 * Returns the last temporal match. Returns null if there isn't one.
 	 * @return
@@ -352,7 +384,13 @@ public class VehicleState {
 	public boolean lastMatchIsValid() {
 		return numberOfBadMatches == 0;
 	}
-
+	public void setEvent(ArrivalDeparture event)
+	{
+		eventHistory.addFirst(event);
+		while (eventHistory.size() > CoreConfig.getEventHistoryMaxSize()) {
+			eventHistory.removeLast();
+		}
+	}
 	/**
 	 * Stores the specified avlReport into the history for the vehicle.
 	 * Makes sure that the AVL history doesn't exceed maximum size.

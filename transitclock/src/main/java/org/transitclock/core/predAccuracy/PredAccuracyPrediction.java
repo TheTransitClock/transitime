@@ -39,12 +39,16 @@ public class PredAccuracyPrediction {
 	// The time the prediction was read. This allows us to determine
 	// how far out into the future the prediction is for.
 	private final Date predictionReadTime;
+	private final Date avlTime;
 	private final String scheduledTime;
 	private final boolean isArrival;
 	// affectedByWaitStop is a Boolean so that null can represent "don't know"
 	private final Boolean affectedByWaitStop;
 	private final String source;
 	private final String algorithm;
+	private final Long totalPredictedDwellTime;
+	private final Long totalPredictedTravelTime;
+	
 
 	/********************** Member Functions **************************/
 
@@ -72,9 +76,9 @@ public class PredAccuracyPrediction {
 	 * 			  This is the algorithm used to generate prediction.
 	 */
 	public PredAccuracyPrediction(String routeId, String directionId,
-			String stopId, String tripId, String vehicleId, Date predictedTime,
-			Date predictionReadTime, boolean isArrival,
-			Boolean affectedByWaitStop, String source, String algorithm, String scheduledTime) {
+			String stopId, String tripId, String vehicleId, Date predictedTime, 
+			Date predictionReadTime, Date avlTime, boolean isArrival,
+			Boolean affectedByWaitStop, String source, String algorithm, String scheduledTime, Long totalPredictedDwellTime, Long totalPredictedTravelTime) {
 		super();
 		this.routeId = routeId;
 		this.directionId = directionId;
@@ -88,6 +92,9 @@ public class PredAccuracyPrediction {
 		this.source = source;
 		this.scheduledTime = scheduledTime;
 		this.algorithm = algorithm;
+		this.totalPredictedDwellTime=totalPredictedDwellTime;
+		this.totalPredictedTravelTime=totalPredictedTravelTime;
+		this.avlTime=avlTime;
 	}
 	
 	public String getAlgorithm() {
@@ -139,24 +146,27 @@ public class PredAccuracyPrediction {
 		return affectedByWaitStop;
 	}
 	
+	
+	public Long getTotalPredictedDwellTime() {
+		return totalPredictedDwellTime;
+	}
+
+	public Long getTotalPredictedTravelTime() {
+		return totalPredictedTravelTime;
+	}
+
+	public Date getAvlTime() {
+		return avlTime;
+	}
+	
 	@Override
 	public String toString() {
-		return "PredAccuracyPrediction [" 
-				+ "routeId=" + routeId 
-				+ ", directionId=" + directionId 
-				+ ", stopId=" + stopId 
-				+ ", tripId=" + tripId
-				+ ", vehicleId=" + vehicleId 
-				+ ", predictedTime=" + predictedTime 
-				+ ", predictionReadTime=" + predictionReadTime
-				+ ", predictionLengthMsec=" + 
-					(predictedTime.getTime() - predictionReadTime.getTime())
-				+ ", isArrival=" + isArrival
-				+ ", affectedByWaitStop=" + affectedByWaitStop
-				+ ", source=" + source
-				+ ", algorithm=" + algorithm
-				+ ", scheduleTime=" + scheduledTime
-				+ "]";
+		return "PredAccuracyPrediction [routeId=" + routeId + ", directionId=" + directionId + ", stopId=" + stopId
+				+ ", tripId=" + tripId + ", vehicleId=" + vehicleId + ", predictedTime=" + predictedTime
+				+ ", predictionReadTime=" + predictionReadTime + ", avlTime=" + avlTime + ", scheduledTime="
+				+ scheduledTime + ", isArrival=" + isArrival + ", affectedByWaitStop=" + affectedByWaitStop
+				+ ", source=" + source + ", algorithm=" + algorithm + ", totalPredictedDwellTime="
+				+ totalPredictedDwellTime + ", totalPredictedTravelTime=" + totalPredictedTravelTime + "]";
 	}
 
 	public String getScheduledTime() {

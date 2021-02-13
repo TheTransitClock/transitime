@@ -82,6 +82,9 @@ public class IpcPrediction implements Serializable {
 	private final Integer delay;
 	private boolean isCanceled;
 	
+	private final long totalPredictedDwellTime;
+	private final long totalPredictedTravelTime;
+	
 	public boolean isCanceled() {
 		return isCanceled;
 	}
@@ -92,6 +95,8 @@ public class IpcPrediction implements Serializable {
 	// Want to store trip on server side so that can determine route info
 	// when creating PredictionsForRouteStop object.
 	private final Trip trip;
+	private long predictedDwellTime;
+	private long predictedTravelTime;
 
 	private static final long serialVersionUID = 7264507678733060173L;
 
@@ -135,7 +140,7 @@ public class IpcPrediction implements Serializable {
 		      boolean atEndOfTrip, boolean affectedByWaitStop,
 		      boolean isDelayed, boolean lateAndSubsequentTripSoMarkAsUncertain,
 		      ArrivalOrDeparture arrivalOrDeparture, Integer delay, long freqStartTime,
-			int tripCounter,boolean isCanceled) {
+			int tripCounter,boolean isCanceled, long predictedDwellTime, long predictedTravelTime, long totalPredictedDwellTime, long totalPredictedTravelTime) {
 		this.vehicleId = avlReport.getVehicleId();
 	    this.routeId = trip.getRouteId();
 	    this.stopId = stopId;
@@ -172,6 +177,11 @@ public class IpcPrediction implements Serializable {
 	    this.freqStartTime = freqStartTime;
 		this.tripCounter =  tripCounter;
 		this.isCanceled=isCanceled;
+		this.predictedDwellTime= predictedDwellTime;
+		this.predictedTravelTime = predictedTravelTime;
+		this.totalPredictedDwellTime=totalPredictedDwellTime;
+		
+		this.totalPredictedTravelTime=totalPredictedTravelTime;
 	}
 
 	/**
@@ -186,7 +196,7 @@ public class IpcPrediction implements Serializable {
 			boolean affectedByWaitStop, String driverId, short passengerCount,
 			float passengerFullness, boolean isDelayed,
 
-			boolean lateAndSubsequentTripSoMarkAsUncertain, boolean isArrival,  Integer delay, Long freqStartTime, int tripCounter,boolean isCanceled) {
+			boolean lateAndSubsequentTripSoMarkAsUncertain, boolean isArrival,  Integer delay, Long freqStartTime, int tripCounter,boolean isCanceled, long totalPredictedDwellTime, long totalPredictedTravelTime) {
 
 		this.vehicleId = vehicleId;
 		this.routeId = routeId;
@@ -219,6 +229,10 @@ public class IpcPrediction implements Serializable {
 
 		this.delay = delay;
 		this.isCanceled=isCanceled;
+		this.predictedDwellTime= predictedDwellTime;
+		this.predictedTravelTime = predictedTravelTime;
+		this.totalPredictedDwellTime=totalPredictedDwellTime;
+		this.totalPredictedTravelTime=totalPredictedTravelTime;
 	}
 
 	
@@ -255,6 +269,11 @@ public class IpcPrediction implements Serializable {
 
 		private Integer delay;
 		private boolean isCanceled;
+		private long predictedDwellTime;
+		private long predictedTravelTime;
+		private long totalPredictedDwellTime;
+		private long totalPredictedTravelTime;
+		
 
 		private static final long serialVersionUID = -8585283691951746719L;
 		private static final short currentSerializationVersion = 0;
@@ -291,6 +310,10 @@ public class IpcPrediction implements Serializable {
 
 			this.delay = p.delay;
 			this.isCanceled=p.isCanceled;
+			this.predictedDwellTime= p.predictedDwellTime;
+			this.predictedTravelTime = p.predictedTravelTime;
+			this.totalPredictedDwellTime=p.totalPredictedDwellTime;
+			this.totalPredictedTravelTime=p.totalPredictedTravelTime;
 		}
 
 		/*
@@ -330,6 +353,11 @@ public class IpcPrediction implements Serializable {
 
 			stream.writeObject(delay);
 			stream.writeBoolean(isCanceled);
+			stream.writeLong(predictedDwellTime);
+			stream.writeLong(predictedTravelTime);
+			stream.writeLong(totalPredictedDwellTime);
+			stream.writeLong(totalPredictedTravelTime);
+			
 
 		}
 
@@ -377,6 +405,11 @@ public class IpcPrediction implements Serializable {
 
 			delay = (Integer) stream.readObject();
 			isCanceled=stream.readBoolean();
+			
+			predictedDwellTime=stream.readLong();;
+			predictedTravelTime=stream.readLong();;
+			totalPredictedDwellTime=stream.readLong();
+			totalPredictedTravelTime=stream.readLong();
 		}
 
 		/*
@@ -391,7 +424,7 @@ public class IpcPrediction implements Serializable {
 					atEndOfTrip, schedBasedPred, avlTime, creationTime,
 					tripStartEpochTime, affectedByWaitStop, driverId,
 					passengerCount, passengerFullness, isDelayed,
-					lateAndSubsequentTripSoMarkAsUncertain, isArrival, delay, freqStartTime, tripCounter,isCanceled);
+					lateAndSubsequentTripSoMarkAsUncertain, isArrival, delay, freqStartTime, tripCounter,isCanceled, totalPredictedDwellTime, totalPredictedTravelTime);
 
 		}
 	}
@@ -445,6 +478,8 @@ public class IpcPrediction implements Serializable {
 				+ (!Float.isNaN(passengerFullness) ? ", psngrFullness="
 						+ StringUtils.twoDigitFormat(passengerFullness) : "")
 				+ ("isCanceled= "+isCanceled)
+				+ ("totalPredictedDwellTime= "+totalPredictedDwellTime)
+				+ ("totalPredictedTravelTime= "+totalPredictedTravelTime)				
 				+ "]";
 	}
 
@@ -593,5 +628,43 @@ public class IpcPrediction implements Serializable {
 	public long getFreqStartTime() {
 		return freqStartTime;
 	}
+
+	public long getTotalPredictedDwellTime() {
+		return totalPredictedDwellTime;
+	}
+
+	public long getTotalPredictedTravelTime() {
+		return totalPredictedTravelTime;
+	}
+
+	public long getPredictedDwellTime() {
+		return predictedDwellTime;
+	}
+
+	public void setPredictedDwellTime(long predictedDwellTime) {
+		this.predictedDwellTime = predictedDwellTime;
+	}
+
+	public long getPredictedTravelTime() {
+		return predictedTravelTime;
+	}
+
+	public void setPredictedTravelTime(long predictedTravelTime) {
+		this.predictedTravelTime = predictedTravelTime;
+	}
+	
+	public boolean totalsMatch()
+	{
+		long sumTotal=totalPredictedDwellTime+totalPredictedTravelTime;
+		long total=this.predictionTime-this.avlTime;
+		if(Math.abs(sumTotal-total)<10)
+		{
+			return true;
+		}else
+		{
+			return false;
+		}
+	}
+	
 	
 }

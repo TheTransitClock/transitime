@@ -249,8 +249,8 @@ public class NextBusPredictionAccuracyModule extends PredictionAccuracyModule {
 					// Store in memory the prediction based on absolute time
 					PredAccuracyPrediction pred = new PredAccuracyPrediction(
 							routeId, directionId, stopId, tripId, vehicleId,
-							predictedTime, predictionsReadTime, isArrival,
-							affectedByWaitStop, "NextBus",null,null);
+							predictedTime, predictionsReadTime, null,isArrival,
+							affectedByWaitStop, "NextBus",null,null, null, null);
 					storePrediction(pred);
 				}
 			}

@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.applications.Core;
 import org.transitclock.config.IntegerConfigValue;
+import org.transitclock.core.VehicleState;
 import org.transitclock.core.dataCache.PredictionDataCache;
 import org.transitclock.db.structs.ArrivalDeparture;
 import org.transitclock.db.structs.PredictionAccuracy;
@@ -70,7 +71,7 @@ public class PredictionAccuracyModule extends Module {
 	
 	private static final IntegerConfigValue timeBetweenPollingPredictionsMsec = 
 			new IntegerConfigValue("transitclock.predAccuracy.pollingRateMsec", 
-					4 * Time.MS_PER_MIN,
+					2 * Time.MS_PER_MIN,
 					"How frequently to query predictions for determining "
 					+ "prediction accuracy.");
 	
@@ -354,7 +355,7 @@ public class PredictionAccuracyModule extends Module {
 					
 					// Store prediction accuracy info so can note that 
 					// a bad prediction was made
-					storePredictionAccuracyInfo(pred, null);
+					storePredictionAccuracyInfo(pred, null, null);
 				} else {
 					++numPredictionsInMemory;		
 					logger.debug("Prediction currently held in memory. {}",pred);
@@ -403,18 +404,25 @@ public class PredictionAccuracyModule extends Module {
 					for (IpcPredictionsForRouteStopDest predList : predictions) {
 						for (IpcPrediction pred : predList
 								.getPredictionsForRouteStop()) {
-							PredAccuracyPrediction accuracyPred = 
-									new PredAccuracyPrediction(
-											routeId, directionId, stopId,
-											pred.getTripId(), 
-											pred.getVehicleId(),
-											new Date(pred.getPredictionTime()),
-											predictionsReadTime,
-											pred.isArrival(),
-											pred.isAffectedByWaitStop(),
-											"TransitClock",null,null);
-							storePrediction(accuracyPred);
-							predictionsFound = true;
+							if(pred.totalsMatch())
+							{
+								PredAccuracyPrediction accuracyPred = 
+										new PredAccuracyPrediction(
+												routeId, directionId, stopId,
+												pred.getTripId(), 
+												pred.getVehicleId(),
+												new Date(pred.getPredictionTime()),
+												predictionsReadTime,
+												new Date(pred.getAvlTime()),
+												pred.isArrival(),
+												pred.isAffectedByWaitStop(),
+												"TransitClock",null,null, pred.getTotalPredictedDwellTime(), pred.getTotalPredictedTravelTime());
+								storePrediction(accuracyPred);
+								predictionsFound = true;
+							}else
+							{
+								logger.error("Totals for prediction do {}  not match.", pred);
+							}
 						}
 					}
 					
@@ -460,9 +468,10 @@ public class PredictionAccuracyModule extends Module {
 	 * 
 	 * @param arrivalDeparture
 	 *            The arrival or departure that was generated
+	 * @param vehicleState 
 	 */
 	public static void handleArrivalDeparture(
-			ArrivalDeparture arrivalDeparture) {
+			ArrivalDeparture arrivalDeparture, VehicleState vehicleState) {
 		// Get the List of predictions for the vehicle/direction/stop 
 		PredictionKey key = new PredictionKey(arrivalDeparture.getVehicleId(), 
 				arrivalDeparture.getDirectionId(), arrivalDeparture.getStopId());
@@ -500,7 +509,7 @@ public class PredictionAccuracyModule extends Module {
 			
 			// Make sure predicted time isn't too far away from the 
 			// arrival/departure time so that don't match to something really
-			// inappropriate. First determine how late vehicle arrived 
+			// inappropriate. First determine how late vehicle arrived    
 			// at stop compared to the original prediction time.
 			long latenessComparedToPrediction = arrivalDeparture.getTime() 
 					- pred.getPredictedTime().getTime();
@@ -510,7 +519,7 @@ public class PredictionAccuracyModule extends Module {
 			
 			// There is a match so store the prediction accuracy info into the 
 			// database
-			storePredictionAccuracyInfo(pred, arrivalDeparture);
+			storePredictionAccuracyInfo(pred, arrivalDeparture, vehicleState);
 			
 			// Remove the prediction that was matched
 			predIterator.remove();
@@ -526,26 +535,205 @@ public class PredictionAccuracyModule extends Module {
 	 *            The corresponding arrival/departure information. Can be null
 	 *            to indicate that for a prediction no corresponding
 	 *            arrival/departure was ever determined.
+	 * @param vehicleState 
 	 */
 	private static void storePredictionAccuracyInfo(
-			PredAccuracyPrediction pred, ArrivalDeparture arrivalDeparture) {
+			PredAccuracyPrediction pred, ArrivalDeparture arrivalDeparture, VehicleState vehicleState) {
 		// If no corresponding arrival/departure found for prediction
 		// then use null for arrival/departure time to indicate such.
 		Date arrivalDepartureTime = arrivalDeparture!=null ? 
 				new Date(arrivalDeparture.getTime()) : null;
+		Long totalDwellTime=null;
+		Long totalTraveTime=null;
+		
+		if(arrivalDeparture!=null && vehicleState!=null && pred.getAvlTime()!=null )
+		{
+			try {
 				
+				logger.debug("Getting times between {} and {}.",pred.getAvlTime(), arrivalDeparture);
+				totalDwellTime=getTotalDwellTimeSince(vehicleState, arrivalDeparture, pred.getAvlTime());		
+				totalTraveTime=getTotalTravelTimeSince(vehicleState, arrivalDeparture, pred.getAvlTime());
+				logger.debug("Total times {} is {} diff from total {}",(totalDwellTime+totalTraveTime),
+						(arrivalDeparture.getTime()-pred.getAvlTime().getTime()) - (totalDwellTime+totalTraveTime),
+							arrivalDeparture.getTime()-pred.getAvlTime().getTime());
+				
+				if((arrivalDeparture.getTime()-pred.getAvlTime().getTime()) - (totalDwellTime+totalTraveTime)!=0)
+				{
+					totalDwellTime=null;
+					totalTraveTime=null;					
+					logger.error("Sum of individual times should match total therefore failed to calculate totals for dwell and travel times. {}", pred);
+				}
+			} catch (Exception e) {			
+				totalDwellTime=null;
+				totalTraveTime=null;
+				logger.error("Failed to calculate totals for dwell and travel times. {} {}",pred, e);
+			}
+		}
+		
 		// Combine the arrival/departure with the corresponding prediction
 		// and create PredictionAccuracy object
-		PredictionAccuracy predAccuracy = new PredictionAccuracy(
-				pred.getRouteId(), pred.getDirectionId(), pred.getStopId(),
-				pred.getTripId(), arrivalDepartureTime,
-				pred.getPredictedTime(), pred.getPredictionReadTime(),
-				pred.getSource(),pred.getAlgorithm(), pred.getVehicleId(), pred.isAffectedByWaitStop());
+		PredictionAccuracy predAccuracy = null;
+		try {
+			predAccuracy = new PredictionAccuracy(
+					pred.getRouteId(), pred.getDirectionId(), pred.getStopId(),
+					pred.getTripId(), arrivalDepartureTime,
+					pred.getPredictedTime(), pred.getPredictionReadTime(), pred.getAvlTime(),
+					pred.getSource(),pred.getAlgorithm(), pred.getVehicleId(), pred.isAffectedByWaitStop(),pred.getTotalPredictedDwellTime(), pred.getTotalPredictedTravelTime(), totalDwellTime, totalTraveTime);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		// Add the prediction accuracy object to the db logger so that
 		// it gets written to database
 		logger.debug("Storing prediction accuracy object to db. {}",
 				predAccuracy);
-		Core.getInstance().getDbLogger().add(predAccuracy);
+		if(predAccuracy!=null)
+			Core.getInstance().getDbLogger().add(predAccuracy);
+	}
+
+	private static Long getTotalTravelTimeSince(VehicleState vehicleState, ArrivalDeparture arrivalDeparture,
+			Date avlTime) {
+						
+		ArrivalDeparture currentArrival=null;
+		ArrivalDeparture currentDeparture=null;
+		ArrivalDeparture lastDeparture=null;
+		logger.debug("Getting travel time total.");
+		ArrivalDeparture currentEvent=arrivalDeparture;
+		do
+		{
+			logger.debug("Getting Event {}.",currentEvent);
+		}while((currentEvent=vehicleState.getPreviousEvent(currentEvent))!=null&&
+				currentEvent.getTime()>=avlTime.getTime());
+		
+		Long totalTravelTime=0L;
+		
+		if(arrivalDeparture!=null)
+		{		
+			
+			if(arrivalDeparture.isArrival())
+			{
+				currentArrival=arrivalDeparture;
+				lastDeparture=null;
+			}
+			else
+			{
+				currentDeparture=arrivalDeparture;
+				lastDeparture=currentDeparture;
+			}
+			
+			currentEvent=arrivalDeparture;
+			
+			ArrivalDeparture lastEvent = currentEvent;
+			
+			while((currentEvent=vehicleState.getPreviousEvent(currentEvent))!=null&&
+					currentEvent.getTime()>=avlTime.getTime())
+			{
+				lastEvent=currentEvent;
+				if(currentEvent.isArrival())
+				{
+					currentArrival=currentEvent;
+					lastDeparture=null;
+				}
+				else
+				{
+					currentDeparture=currentEvent;
+					lastDeparture=currentDeparture;
+				}
+				
+				if(currentDeparture!=null&&currentArrival!=null)
+				{
+					
+					if(!currentDeparture.getStopId().equals(currentArrival.getStopId()))
+					{
+						if(currentArrival.getTime()>=currentDeparture.getTime())
+						{
+							totalTravelTime=totalTravelTime+(currentArrival.getTime()-currentDeparture.getTime());
+							logger.debug("Getting travel time between {} and {} value {}.", currentDeparture, currentArrival,(currentArrival.getTime()-currentDeparture.getTime()) );
+							currentDeparture=null;
+							currentArrival=null;
+						}		
+					}
+				}else
+				{
+					logger.warn("Arrival {} or departure {} is null.",currentArrival,currentDeparture);
+				}
+			}
+			
+			if(lastEvent!=null&&lastEvent.isDeparture())
+			{
+				totalTravelTime=totalTravelTime+(lastEvent.getTime()-avlTime.getTime());
+				logger.debug("Getting travel time between {} and {} value {}.",avlTime, lastEvent, (lastEvent.getTime()-avlTime.getTime()));
+			}									
+		}
+		return totalTravelTime;
+	}
+
+	private static Long getTotalDwellTimeSince(VehicleState vehicleState, ArrivalDeparture arrivalDeparture,
+			Date avlTime) {
+		ArrivalDeparture currentArrival=null;
+		ArrivalDeparture currentDeparture=null;
+		ArrivalDeparture lastArrival=null;
+		Long totalDwellTime=0L;
+		
+		if(arrivalDeparture!=null)
+		{		
+			if(arrivalDeparture.isArrival())
+			{
+				currentArrival=arrivalDeparture;
+				lastArrival=currentArrival;
+			}
+			else
+			{
+				currentDeparture=arrivalDeparture;
+				lastArrival=null;
+			}
+			
+			ArrivalDeparture currentEvent=arrivalDeparture;
+			
+			ArrivalDeparture lastEvent = currentEvent;
+			
+			while((currentEvent=vehicleState.getPreviousEvent(currentEvent))!=null
+					&& currentEvent.getTime()>=avlTime.getTime())
+			{
+				
+				lastEvent=currentEvent;
+				if(currentEvent.isArrival())
+				{
+					currentArrival=currentEvent;
+					lastArrival=currentArrival;
+				}
+				else
+				{
+					currentDeparture=currentEvent;
+					lastArrival=null;
+				}
+			 
+				
+				if(currentDeparture!=null&&currentArrival!=null)
+				{
+					if(currentDeparture.getTime()>=currentArrival.getTime()&&currentDeparture.getStopId().equals(currentArrival.getStopId()))
+					{						
+						totalDwellTime=totalDwellTime+(currentDeparture.getTime()-currentArrival.getTime());
+						logger.debug("Getting dwell time between {} and {} value {}.", currentArrival,currentDeparture, (currentDeparture.getTime()-currentArrival.getTime()));
+						currentDeparture=null;
+						currentArrival=null;		
+					}
+					
+				}else
+				{
+					logger.warn("Arrival {} or departure {} is null.",currentArrival,currentDeparture);
+				}
+				
+			}
+			
+			if(lastEvent!=null&&lastEvent.isArrival())
+			{
+				totalDwellTime=totalDwellTime+(lastEvent.getTime()-avlTime.getTime());
+				logger.debug("Getting dwell time between {} and {} value {}.",avlTime, lastEvent,(lastEvent.getTime()-avlTime.getTime()) );
+			}
+		
+		}
+		return totalDwellTime;
 	}
 }

@@ -107,6 +107,10 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 	@Column
 	@Temporal(TemporalType.TIMESTAMP)
 	private final Date predictionReadTime;
+	
+	@Column
+	@Temporal(TemporalType.TIMESTAMP)
+	private final Date avlTime;
 
 	// Positive means vehicle arrived at stop later then predicted for and
 	// negative value means vehicle arrived earlier.
@@ -126,6 +130,19 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 
 	@Column
 	private final Boolean affectedByWaitStop;
+	
+	@Column
+	private final Long totalPredictedDwellTime;
+	
+	@Column
+	private final Long totalPredictedTravelTime;
+	
+	@Column 
+	private final Long totalActualDwellTime;
+	
+	@Column 
+	private final Long totalActualTravelTime;
+	
 	
 	private static final long serialVersionUID = -6900411351649946446L;
 
@@ -148,9 +165,9 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 	 */
 	public PredictionAccuracy(String routeId, String directionId,
 			String stopId, String tripId, Date arrivalDepartureTime,
-			Date predictedTime, Date predictionReadTime,
+			Date predictedTime, Date predictionReadTime, Date avlTime,
 			String predictionSource,String predictionAlgorithm, String vehicleId, 
-			Boolean affectedByWaitStop) {
+			Boolean affectedByWaitStop, Long totalPredictedDwellTime, Long totalPredictedTravelTime, Long totalActualDwellTime, Long totalActualTravelTime) {
 		super();
 		this.routeId = routeId;
 		
@@ -168,6 +185,11 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 		this.vehicleId = vehicleId;
 		this.affectedByWaitStop = affectedByWaitStop;
 		this.predictionAlgorithm=predictionAlgorithm;
+		this.totalPredictedDwellTime=totalPredictedDwellTime;
+		this.totalPredictedTravelTime=totalPredictedTravelTime;
+		this.totalActualDwellTime=totalActualDwellTime;
+		this.totalActualTravelTime=totalActualTravelTime;
+		this.avlTime=avlTime;
 	}
 
 	public String getPredictionAlgorithm() {
@@ -193,6 +215,12 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 		this.vehicleId = null;
 		this.affectedByWaitStop = null;
 		this.predictionAlgorithm = null;
+		this.totalPredictedDwellTime = null;
+		this.totalPredictedTravelTime = null;
+		this.totalActualDwellTime = null;
+		this.totalActualTravelTime = null;
+		this.avlTime=null;
+				
 	}
 
 	@Override
@@ -319,24 +347,23 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 		return true;
 	}
 
+	
+
+
+	
+
+
 	@Override
 	public String toString() {
-		return "PredictionAccuracy [" 
-				+ "routeId=" + routeId
-				+ " routeShortName=" + routeShortName
-				+ ", directionId=" + directionId 
-				+ ", stopId=" + stopId
-				+ ", tripId=" + tripId
-				+ ", arrivalDepartureTime=" + arrivalDepartureTime
-				+ ", predictedTime=" + predictedTime
-				+ ", predictionReadTime=" + predictionReadTime
-				+ ", predictionLengthMsecs=" + getPredictionLengthMsecs()
-				+ ", predictionAccuracyMsecs=" + predictionAccuracyMsecs
-				+ ", predictionSource=" + predictionSource 
-				+ ", predictionAlgorithm=" + predictionAlgorithm				
-				+ ", vehicleId=" + vehicleId 
-				+ ", affectedByWaitStop=" + affectedByWaitStop
-				+ "]";
+		return "PredictionAccuracy [id=" + id + ", routeId=" + routeId + ", routeShortName=" + routeShortName
+				+ ", directionId=" + directionId + ", stopId=" + stopId + ", tripId=" + tripId
+				+ ", arrivalDepartureTime=" + arrivalDepartureTime + ", predictedTime=" + predictedTime
+				+ ", predictionReadTime=" + predictionReadTime + ", avlTime=" + avlTime + ", predictionAccuracyMsecs="
+				+ predictionAccuracyMsecs + ", predictionSource=" + predictionSource + ", predictionAlgorithm="
+				+ predictionAlgorithm + ", vehicleId=" + vehicleId + ", affectedByWaitStop=" + affectedByWaitStop
+				+ ", totalPredictedDwellTime=" + totalPredictedDwellTime + ", totalPredictedTravelTime="
+				+ totalPredictedTravelTime + ", totalActualDwellTime=" + totalActualDwellTime
+				+ ", totalActualTravelTime=" + totalActualTravelTime + "]";
 	}
 
 	public String getRouteId() {
@@ -385,6 +412,19 @@ public class PredictionAccuracy implements Lifecycle, Serializable {
 
 	public String getVehicleId() {
 		return vehicleId;
+	}
+	
+
+	public Long getTotalPredictedDwellTime() {
+		return totalPredictedDwellTime;
+	}
+
+	public Long getTotalPredictedTravelTime() {
+		return totalPredictedTravelTime;
+	}
+
+	public Date getAvlTime() {
+		return avlTime;
 	}
 
 	/**
