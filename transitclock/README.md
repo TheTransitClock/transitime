@@ -170,8 +170,9 @@ args:
 
 ```
 example:
-	java  -Xmx1000M -Dtransitime.core.agencyId=02 -jar processGTFSFile.jar -c d:/transiTime/transiTimeConfig.xml -gtfsDirectoryName d:/transiTime/updated_google_transit_irishrail/ -storeNewRevs -maxTravelTimeSegmentLength 1000
+	java  -Xmx1000M -Dtransitclock.core.agencyId=02 -jar processGTFSFile.jar -c d:/transitclock/transitclock.xml -gtfsDirectoryName d:/transitclock/updated_google_transit_irishrail/ -storeNewRevs -maxTravelTimeSegmentLength 1000
 ```
 
+Note: example config files can be found in the src/main/resources directory. You also need to correctly set up the Hibernate file for use with your database server. Replace the values for the driver and dialect with the corresponding ones from [here](https://www.tutorialspoint.com/hibernate/hibernate_configuration.htm).
 
 WORK IN PROGRESS........................
