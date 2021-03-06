@@ -119,7 +119,7 @@ public class AvlReport implements Serializable {
 	// Can be block, trip, or route ID
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private String assignmentId;  // optional
-	
+
 	// The type of the assignment received in the AVL feed
 	public enum AssignmentType {
 		UNSET, 
@@ -160,7 +160,13 @@ public class AvlReport implements Serializable {
 	// This parameter is optional. Set to null if data not available.
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	private final Float passengerFullness;
-		
+
+	// Optional.  Mirrors GTFS-RT occupancy status so it can be passed through
+	// we choose ordinal sacrificing readability for size!
+	@Column
+	@Enumerated(EnumType.ORDINAL)
+	private OccupancyStatus occupancyStatus;
+
 	// Optional. For containing additional info for a particular feed.
 	// Not declared final because setField1() is used to set values.
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
@@ -179,7 +185,7 @@ public class AvlReport implements Serializable {
 			LoggerFactory.getLogger(AvlReport.class);	
 
 	// Needed because serializable so can transmit using JMS or RMI
-	private static final long serialVersionUID = 92384928349823L;
+	private static final long serialVersionUID = 92384928349824L;
 	
 	/********************** Member Functions **************************/
 
@@ -795,6 +801,24 @@ public class AvlReport implements Serializable {
 	public void setSource(String source) {
 		this.source=sized(source);
 	}
+
+	/**
+	 * GTFS-RT inspired levels of crowding information.
+	 * @return enumeration
+	 */
+	public OccupancyStatus getOccupancyStatus() {
+		return occupancyStatus;
+	}
+
+	/**
+	 * GTFS-RT inspired levels of crowding information.
+	 */
+	public void setOccupancyStatus(OccupancyStatus occupancyStatus) {
+		this.occupancyStatus = occupancyStatus;
+	}
+
+
+
 	/**
 	 * Returns how many msec elapsed between the GPS fix was generated
 	 * to the time it was finally processed. Returns 0 if timeProcessed

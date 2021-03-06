@@ -12,6 +12,7 @@ import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.AvlReport.AssignmentType;
 
 import com.amazonaws.services.sqs.model.Message;
+import org.transitclock.db.structs.OccupancyStatus;
 
 /**
  * Implementation of SqsMessageUnmarshaller for WMATA data. 
@@ -95,6 +96,13 @@ public class WmataAvlTypeUnmarshaller implements SqsMessageUnmarshaller {
         speed = (float) msgObj.getDouble("averageSpeed") * 0.3048f; // convert to m/s
     }
 
+    OccupancyStatus occupancyStatus = null;
+    if (msgObj.has("crowdingStatus")) {
+        String occupancyString = null;
+        occupancyString = msgObj.getString("crowdingStatus");
+        occupancyStatus = OccupancyStatus.lenientParse(occupancyString);
+    }
+
     Long forwarderTimeReceived = null;
     if (msgObj.has("received")) {
       forwarderTimeReceived = msgObj.getLong("received");
@@ -126,6 +134,9 @@ public class WmataAvlTypeUnmarshaller implements SqsMessageUnmarshaller {
     String source = "sqs";
     if (vehicleId != null && lat != null && lon != null && time != null) {
         AvlReport ar = new AvlReport(vehicleId, time, lat, lon, speed, heading, source);
+        if (occupancyStatus != null) {
+            ar.setOccupancyStatus(occupancyStatus);
+        }
         if (msgObj.has("blockAlpha")) {
             String blockAlpha = msgObj.getString("blockAlpha");
             if (blockAlpha != null) {

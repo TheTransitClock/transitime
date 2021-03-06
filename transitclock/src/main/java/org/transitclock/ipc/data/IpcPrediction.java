@@ -24,6 +24,7 @@ import java.util.Date;
 
 import org.transitclock.applications.Core;
 import org.transitclock.db.structs.AvlReport;
+import org.transitclock.db.structs.OccupancyStatus;
 import org.transitclock.db.structs.Trip;
 import org.transitclock.ipc.data.IpcPrediction.ArrivalOrDeparture;
 import org.transitclock.utils.StringUtils;
@@ -81,6 +82,7 @@ public class IpcPrediction implements Serializable {
 	private final boolean isArrival;
 	private final Integer delay;
 	private boolean isCanceled;
+	private final IpcOccupancyStatus occupancyStatus;
 	
 	public boolean isCanceled() {
 		return isCanceled;
@@ -93,7 +95,7 @@ public class IpcPrediction implements Serializable {
 	// when creating PredictionsForRouteStop object.
 	private final Trip trip;
 
-	private static final long serialVersionUID = 7264507678733060173L;
+	private static final long serialVersionUID = 7264507678733060174L;
 
 	public enum ArrivalOrDeparture {ARRIVAL, DEPARTURE};
 	
@@ -121,7 +123,6 @@ public class IpcPrediction implements Serializable {
 	 * @param atEndOfTrip
 	 *            True if prediction for last stop of trip, which means likely
 	 *            not useful to user
-	 * @param predictionAffectedByWaitStop
 	 * @param isDelayed
 	 * @param lateAndSubsequentTripSoMarkAsUncertain
 	 * @param arrivalOrDeparture
@@ -164,6 +165,7 @@ public class IpcPrediction implements Serializable {
 	    this.driverId = avlReport.getDriverId();
 	    this.passengerCount = (short) avlReport.getPassengerCount();
 	    this.passengerFullness = avlReport.getPassengerFullness();
+		this.occupancyStatus = toIpcOccupancyStatus(avlReport.getOccupancyStatus());
 	    this.isDelayed = isDelayed;
 	    this.lateAndSubsequentTripSoMarkAsUncertain = 
 	        lateAndSubsequentTripSoMarkAsUncertain;
@@ -172,6 +174,11 @@ public class IpcPrediction implements Serializable {
 	    this.freqStartTime = freqStartTime;
 		this.tripCounter =  tripCounter;
 		this.isCanceled=isCanceled;
+	}
+
+	private IpcOccupancyStatus toIpcOccupancyStatus(OccupancyStatus occupancyStatus) {
+		if (occupancyStatus == null) return null;
+		return IpcOccupancyStatus.toEnum(occupancyStatus.valueOf());
 	}
 
 	/**
@@ -186,7 +193,7 @@ public class IpcPrediction implements Serializable {
 			boolean affectedByWaitStop, String driverId, short passengerCount,
 			float passengerFullness, boolean isDelayed,
 
-			boolean lateAndSubsequentTripSoMarkAsUncertain, boolean isArrival,  Integer delay, Long freqStartTime, int tripCounter,boolean isCanceled) {
+			boolean lateAndSubsequentTripSoMarkAsUncertain, boolean isArrival,  Integer delay, Long freqStartTime, int tripCounter,boolean isCanceled, IpcOccupancyStatus occupancyStatus) {
 
 		this.vehicleId = vehicleId;
 		this.routeId = routeId;
@@ -209,6 +216,7 @@ public class IpcPrediction implements Serializable {
 		this.driverId = driverId;
 		this.passengerCount = passengerCount;
 		this.passengerFullness = passengerFullness;
+		this.occupancyStatus = occupancyStatus;
 		this.isDelayed = isDelayed;
 		this.lateAndSubsequentTripSoMarkAsUncertain = 
 				lateAndSubsequentTripSoMarkAsUncertain;
@@ -246,6 +254,7 @@ public class IpcPrediction implements Serializable {
 		private String driverId;
 		private short passengerCount;
 		private float passengerFullness;
+		private IpcOccupancyStatus occupancyStatus;
 		private boolean isDelayed;
 		private boolean lateAndSubsequentTripSoMarkAsUncertain;
 		private boolean isArrival;
@@ -281,6 +290,7 @@ public class IpcPrediction implements Serializable {
 			this.driverId = p.driverId;
 			this.passengerCount = p.passengerCount;
 			this.passengerFullness = p.passengerFullness;
+			this.occupancyStatus = p.occupancyStatus;
 			this.isDelayed = p.isDelayed;
 			this.lateAndSubsequentTripSoMarkAsUncertain = 
 					p.lateAndSubsequentTripSoMarkAsUncertain;
@@ -330,7 +340,7 @@ public class IpcPrediction implements Serializable {
 
 			stream.writeObject(delay);
 			stream.writeBoolean(isCanceled);
-
+			stream.writeObject(occupancyStatus);
 		}
 
 		/*
@@ -377,6 +387,7 @@ public class IpcPrediction implements Serializable {
 
 			delay = (Integer) stream.readObject();
 			isCanceled=stream.readBoolean();
+			occupancyStatus = (IpcOccupancyStatus) stream.readObject();
 		}
 
 		/*
@@ -391,7 +402,7 @@ public class IpcPrediction implements Serializable {
 					atEndOfTrip, schedBasedPred, avlTime, creationTime,
 					tripStartEpochTime, affectedByWaitStop, driverId,
 					passengerCount, passengerFullness, isDelayed,
-					lateAndSubsequentTripSoMarkAsUncertain, isArrival, delay, freqStartTime, tripCounter,isCanceled);
+					lateAndSubsequentTripSoMarkAsUncertain, isArrival, delay, freqStartTime, tripCounter,isCanceled, occupancyStatus);
 
 		}
 	}
@@ -445,6 +456,7 @@ public class IpcPrediction implements Serializable {
 				+ (!Float.isNaN(passengerFullness) ? ", psngrFullness="
 						+ StringUtils.twoDigitFormat(passengerFullness) : "")
 				+ ("isCanceled= "+isCanceled)
+				+ ", occupancyStatus=" + occupancyStatus
 				+ "]";
 	}
 
@@ -545,6 +557,8 @@ public class IpcPrediction implements Serializable {
 	public boolean isPassengerCountValid() {
 		return passengerCount >= 0;
 	}
+
+	public IpcOccupancyStatus getOccupancyStatus() { return occupancyStatus; }
 
 	public boolean isDelayed() {
 		return isDelayed;

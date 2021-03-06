@@ -199,7 +199,6 @@ public class IpcVehicle implements Serializable {
 	 * @param blockId
 	 * @param blockAssignmentMethod
 	 * @param avl
-	 * @param pathHeading
 	 * @param routeId
 	 * @param routeShortName
 	 * @param routeName
@@ -626,7 +625,7 @@ public class IpcVehicle implements Serializable {
 		IpcAvl avl =
 				new IpcAvl("avlVehicleId", 10, 1.23f, 4.56f, 0.0f, 0.0f, null,
 						"block", AssignmentType.BLOCK_ID, "driver", "license",
-						0);
+						0, null);
 		IpcVehicle v =
 				new IpcVehicle("blockId",
 						BlockAssignmentMethod.AVL_FEED_BLOCK_ASSIGNMENT, avl,

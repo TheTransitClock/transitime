@@ -24,6 +24,7 @@ import java.io.Serializable;
 
 import org.transitclock.db.structs.AvlReport;
 import org.transitclock.db.structs.AvlReport.AssignmentType;
+import org.transitclock.db.structs.OccupancyStatus;
 import org.transitclock.utils.Geo;
 import org.transitclock.utils.Time;
 
@@ -47,8 +48,10 @@ public class IpcAvl implements Serializable {
 	private final String driverId;
 	private final String licensePlate;
 	private final int passengerCount;
+	private final IpcOccupancyStatus occupancyStatus;
 
-	private static final long serialVersionUID = 2506303490106709586L;
+	private static final long serialVersionUID = 2506303490106709587L;
+
 
 	/********************** Member Functions **************************/
 
@@ -69,7 +72,7 @@ public class IpcAvl implements Serializable {
 	public IpcAvl(String vehicleId, long time, float latitude, float longitude,
 			float speed, float heading, String source, String assignmentId,
 			AssignmentType assignmentType, String driverId,
-			String licensePlate, int passengerCount) {
+			String licensePlate, int passengerCount, IpcOccupancyStatus occupancyStatus) {
 		this.vehicleId = vehicleId;
 		this.time = time;
 		this.latitude = latitude;
@@ -82,10 +85,11 @@ public class IpcAvl implements Serializable {
 		this.driverId = driverId;
 		this.licensePlate = licensePlate;
 		this.passengerCount = passengerCount;
+		this.occupancyStatus = occupancyStatus;
 	}
 	
 	/**
-	 * @param lastAvlReport
+	 * copy from AvlReport
 	 */
 	public IpcAvl(AvlReport a) {
 		this.vehicleId = a.getVehicleId();
@@ -100,6 +104,12 @@ public class IpcAvl implements Serializable {
 		this.driverId = a.getDriverId();
 		this.licensePlate = a.getLicensePlate();
 		this.passengerCount = a.getPassengerCount();
+		this.occupancyStatus = toIpcOccupancyStatus(a.getOccupancyStatus());
+	}
+
+	private IpcOccupancyStatus toIpcOccupancyStatus(OccupancyStatus occupancyStatus) {
+		if (occupancyStatus == null) return null;
+		return IpcOccupancyStatus.toEnum(occupancyStatus.valueOf());
 	}
 
 	/*
@@ -120,7 +130,8 @@ public class IpcAvl implements Serializable {
 		private String driverId;
 		private String licensePlate;
 		private int passengerCount;
-		
+		private IpcOccupancyStatus occupancyStatus;
+
 		private static final long serialVersionUID = 6220698347690060245L;
 		private static final short serializationVersion = 0;
 
@@ -140,6 +151,7 @@ public class IpcAvl implements Serializable {
 			this.driverId = avl.driverId;
 			this.licensePlate = avl.licensePlate;
 			this.passengerCount = avl.passengerCount;
+			this.occupancyStatus = avl.occupancyStatus;
 		}
 		
 		/*
@@ -163,6 +175,7 @@ public class IpcAvl implements Serializable {
 			stream.writeObject(driverId);
 			stream.writeObject(licensePlate);
 			stream.writeInt(passengerCount);
+			stream.writeObject(occupancyStatus);
 		}
 
 		/*
@@ -175,7 +188,7 @@ public class IpcAvl implements Serializable {
 		private Object readResolve() {
 			return new IpcAvl(vehicleId, time, latitude, longitude, speed,
 					heading, source, assignmentId, assignmentType, driverId,
-					licensePlate, passengerCount);
+					licensePlate, passengerCount, occupancyStatus);
 		}
 
 		/*
@@ -203,6 +216,7 @@ public class IpcAvl implements Serializable {
 			driverId = (String) stream.readObject();
 			licensePlate = (String) stream.readObject();
 			passengerCount = stream.readInt();
+			occupancyStatus = (IpcOccupancyStatus) stream.readObject();
 		}
 	}
 
@@ -277,6 +291,8 @@ public class IpcAvl implements Serializable {
 		return passengerCount;
 	}
 
+	public IpcOccupancyStatus getOccupancyStatus() { return occupancyStatus; }
+
 	@Override
 	public String toString() {
 		return "IpcAvl [vehicleId=" + vehicleId 
@@ -290,7 +306,8 @@ public class IpcAvl implements Serializable {
 				+ ", assignmentType=" + assignmentType
 				+ ", driverId=" + driverId 
 				+ ", licensePlate=" + licensePlate
-				+ ", passengerCount=" + passengerCount 
+				+ ", passengerCount=" + passengerCount
+				+ ", occupancyStatus=" + occupancyStatus
 				+ "]";
 	}
 	    

@@ -54,17 +54,12 @@
         setting batch_size to 25 actually hurt performance by a few
         percent. Probably much more important when db is remote and
         network traffic could bog down the thread that is writing. -->
-<<<<<<< HEAD:transitime/src/main/resources/postgres_hibernate.cfg.xml
-   <property name="hibernate.jdbc.batch_size">25</property>  
-   
-=======
      <property name="hibernate.jdbc.batch_size">1</property>
      <property name="default_batch_fetch_size">100</property>
      <property name="hibernate.order_inserts">true</property>
      <property name="hibernate.order_updates">true</property>
      <property name="hibernate.connection.autocommit">true</property>
      <property name="hibernate.hbm2ddl.auto">update</property>
->>>>>>> 336ae7a8c5ba9942d8023817d7f7d64ffef019da:transitimeQuickStart/src/test/resources/hsql_hibernate.cfg.xml
 
  
    <!-- Configure db settings. Currently commented out because this
