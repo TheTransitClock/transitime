@@ -1,13 +1,27 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>TheTransitClock</groupId>
 	<artifactId>transitclockCore</artifactId>
-	<version>2.0.0-SNAPSHOT</version>
+
+
+	<name>transitclockCore</name>
+	<parent>
+		<groupId>TheTransitClock</groupId>
+		<artifactId>transitclock</artifactId>
+		<version>2.0.0-SNAPSHOT</version>
+	</parent>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<javax.activation.version>1.2.0</javax.activation.version>
+		<jaxb.api.version>2.3.0</jaxb.api.version>
+		<lombok.version>1.18.6</lombok.version>
+		<hibernate.version>5.4..Final</hibernate.version>
+		<hibernate.validator.version>6.0.21.Final</hibernate.validator.version>
+		<hibernate.validator.version>6.0.21.Final</hibernate.validator.version>
+
 	</properties>
-	<name>transitclockCore</name>
 	<repositories>
 
 		<!-- Needed to fix problem with one-jar not working with AWS SDK. Was getting 
@@ -31,6 +45,36 @@
 	</pluginRepositories>
 	<dependencies>
 		<dependency>
+			<groupId>com.sun.activation</groupId>
+			<artifactId>javax.activation</artifactId>
+			<version>${javax.activation.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>${jaxb.api.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-core</artifactId>
+			<version>${jaxb.api.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-impl</artifactId>
+			<version>${jaxb.api.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>${lombok.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>TheTransitClock</groupId>
 			<artifactId>transitclockBarefootClient</artifactId>
 			<version>2.0.0-SNAPSHOT</version>
@@ -45,7 +89,7 @@
 			<artifactId>esri-geometry-api</artifactId>
 			<version>1.1</version>
 		</dependency>
-		<!-- Needed to fix problem with one-jar not working with AWS SDK. Was getting
+		<!-- Needed to fix problem with one-jar not working with AWS SDK. Was getting 
 			error message "Fatal: Failed to load the internal config for AWS" -->
 		<dependency>
 			<groupId>com.simontuffs</groupId>
@@ -53,9 +97,9 @@
 			<version>0.97.3</version>
 		</dependency>
 
-		<!-- Database related, including c3p0 production quality connector. Note:
-			have found that can have problems if don't use similar versions. Can have
-			trouble finding the c3p0 connection pooler for example if use old hibernate-core
+		<!-- Database related, including c3p0 production quality connector. Note: 
+			have found that can have problems if don't use similar versions. Can have 
+			trouble finding the c3p0 connection pooler for example if use old hibernate-core 
 			but new c3p0. -->
 		<dependency>
 			<groupId>mysql</groupId>
@@ -68,29 +112,23 @@
 			<version>9.3-1103-jdbc41</version>
 		</dependency>
 
+		<!-- hibernate -->
+	
+	<!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-core -->
 		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-core</artifactId>
-			<version>4.3.9.Final</version>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate.common</groupId>
-			<artifactId>hibernate-commons-annotations</artifactId>
-			<version>4.0.5.Final</version>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-c3p0</artifactId>
-			<version>4.3.9.Final</version>
+		    <groupId>org.hibernate</groupId>
+		    <artifactId>hibernate-core</artifactId>
+		    <version>5.4.30.Final</version>
 		</dependency>
 
-		<!-- hibernate-core loads in really old version of xml-apis so load in
+
+		<!-- hibernate-core loads in really old version of xml-apis so load in 
 			newer version explicitly. Otherwise get problems with the Node class. -->
-		<dependency>
+		<!--<dependency>
 			<groupId>xml-apis</groupId>
 			<artifactId>xml-apis</artifactId>
 			<version>1.4.01</version>
-		</dependency>
+		</dependency>-->
 
 		<!-- For logging -->
 		<dependency>
@@ -105,9 +143,9 @@
 			<version>1.1.3</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.hsqldb</groupId>
-    			<artifactId>hsqldb</artifactId>
-    			<version>2.2.4</version>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<version>2.2.4</version>
 		</dependency>
 
 		<dependency>
@@ -151,7 +189,7 @@
 			<version>1.2</version>
 		</dependency>
 
-		<!-- I believe not needed <dependency> <groupId>org.apache.lucene</groupId>
+		<!-- I believe not needed <dependency> <groupId>org.apache.lucene</groupId> 
 			<artifactId>lucene-core</artifactId> <version>3.6.2</version> </dependency> -->
 
 		<!-- For JMS for fancy handling of AVL feeds -->
@@ -173,10 +211,10 @@
 			<version>1.3.0</version>
 		</dependency>
 
-		<!-- For processing JSON. Needed for Amigocloud and other JSON based AVL
-			feeds. NOTE: the version 20141113 does not work with Java 1.7, which is what
-			is still the normal version of Java for AWS, at least as of June 2015. Need
-			to use old version 20140107 which was compiled with Java 1.7 instead of Java
+		<!-- For processing JSON. Needed for Amigocloud and other JSON based AVL 
+			feeds. NOTE: the version 20141113 does not work with Java 1.7, which is what 
+			is still the normal version of Java for AWS, at least as of June 2015. Need 
+			to use old version 20140107 which was compiled with Java 1.7 instead of Java 
 			1.8 -->
 		<dependency>
 			<groupId>org.json</groupId>
@@ -191,7 +229,7 @@
 			<version>1.1</version>
 		</dependency>
 
-		<!-- For concurrency annotations like @Immutable and @ThreadSave from the
+		<!-- For concurrency annotations like @Immutable and @ThreadSave from the 
 			"Concurrency in Practice" book need library -->
 		<dependency>
 			<groupId>net.jcip</groupId>
@@ -228,15 +266,18 @@
 			<scope>test</scope>
 		</dependency>
 		<!-- Used for reflection to find classes in package -->
+		
+		<!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
 		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>18.0</version>
+	    	<groupId>com.google.guava</groupId>
+	    	<artifactId>guava</artifactId>
+	    	<version>30.1.1-jre</version>
 		</dependency>
-		<dependency>	
-		    <groupId>org.ehcache</groupId>
-    		<artifactId>ehcache</artifactId>
-    		<version>3.4.0</version>
+		
+		<dependency>
+			<groupId>org.ehcache</groupId>
+			<artifactId>ehcache</artifactId>
+			<version>3.4.0</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -246,18 +287,18 @@
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.esotericsoftware/kryo -->
 		<dependency>
-    		<groupId>com.esotericsoftware</groupId>
-    		<artifactId>kryo</artifactId>
-    		<version>4.0.0</version>
+			<groupId>com.esotericsoftware</groupId>
+			<artifactId>kryo</artifactId>
+			<version>4.0.0</version>
 		</dependency>
-		
+
 		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-jcs-core -->
 		<dependency>
-		    <groupId>org.apache.commons</groupId>
-		    <artifactId>commons-jcs-core</artifactId>
-		    <version>2.2</version>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-jcs-core</artifactId>
+			<version>2.2</version>
 		</dependency>
-		
+
 		<!-- Servlet related functionality -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -266,12 +307,12 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!--  OLS regression algorithm -->
+		<!-- OLS regression algorithm -->
 		<dependency>
-      		<groupId>com.github.haifengl</groupId>
-      		<artifactId>smile-core</artifactId>
-      		<version>1.5.1</version>
-    	</dependency>
+			<groupId>com.github.haifengl</groupId>
+			<artifactId>smile-core</artifactId>
+			<version>1.5.1</version>
+		</dependency>
 
 		<!-- Logback log appender for AWS CloudWatch -->
 		<dependency>
@@ -280,20 +321,19 @@
 			<version>1.11</version>
 		</dependency>
 
-		<!--  OLS regression algorithm -->
+		<!-- OLS regression algorithm -->
 		<dependency>
-      		<groupId>com.github.haifengl</groupId>
-      		<artifactId>smile-core</artifactId>
-      		<version>1.5.1</version>
-    	</dependency>
+			<groupId>com.github.haifengl</groupId>
+			<artifactId>smile-core</artifactId>
+			<version>1.5.1</version>
+		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/net.spy/spymemcached -->
 		<dependency>
-		    <groupId>net.spy</groupId>
-		    <artifactId>spymemcached</artifactId>
-		    <version>2.12.3</version>
+			<groupId>net.spy</groupId>
+			<artifactId>spymemcached</artifactId>
+			<version>2.12.3</version>
 		</dependency>
-
 
 	</dependencies>
 
@@ -301,10 +341,9 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.5.1</version>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>11</source>
+					<target>11</target>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -441,83 +480,79 @@
 					</execution>
 				</executions>
 			</plugin>
-
-
-
-
-
 		</plugins>
-
-
 	</build>
 	<profiles>
 
 
-        <profile>
-            <id>PredictionsAccuracyIntegrationTest</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>truezip-maven-plugin</artifactId>
-                        <version>1.2</version>
-                        <executions>
-                            <execution>
-                                <id>unzip-database</id>
-                                <goals>
-                                    <goal>copy</goal>
-                                </goals>
-                                <phase>test</phase>
-                                <configuration>
-                                    <verbose>true</verbose>
-                                    <fileset>
-                                        <directory>${project.basedir}/src/test/resources/database/transitime_test.zip</directory>
-                                        <outputDirectory>${project.basedir}/src/test/resources/database/data</outputDirectory>
-                                    </fileset>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.onebusaway.plugins</groupId>
-                        <artifactId>maven-hsqldb-plugin</artifactId>
-                        <!-- version 1.0.1 supports hsqldb 2.3.2 -->
-                        <version>1.0.1</version>
-                        <executions>
-                            <execution>
-                                <id>user-database-start</id>
-                                <phase>test</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <deleteOnEntry>true</deleteOnEntry>
-                                    <dbName>${project.basedir}/src/test/resources/database/data/transitime_test</dbName>
-                                    <port>9001</port>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <version>1.1.1</version>
-                        <executions>
-                            <execution>
-                                <phase>test</phase>
-                                <id>test-case-execution</id>
-                                <goals>
-                                    <goal>java</goal>
-                                </goals>
-                                <configuration>
-                                    <mainClass>org.transitclock.applications.PredictionsAccuracyIntegrationTest</mainClass>
-                                    <commandlineArgs>-c transitime/src/test/resources/transiTimeConfigIntegrationTest.xml -gtfsDirectoryName transitime/src/test/resources/wmata_gtfs -storeNewRevs -maxTravelTimeSegmentLength 1000</commandlineArgs>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
+		<profile>
+			<id>PredictionsAccuracyIntegrationTest</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>truezip-maven-plugin</artifactId>
+						<version>1.2</version>
+						<executions>
+							<execution>
+								<id>unzip-database</id>
+								<goals>
+									<goal>copy</goal>
+								</goals>
+								<phase>test</phase>
+								<configuration>
+									<verbose>true</verbose>
+									<fileset>
+										<directory>${project.basedir}/src/test/resources/database/transitime_test.zip</directory>
+										<outputDirectory>${project.basedir}/src/test/resources/database/data</outputDirectory>
+									</fileset>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.onebusaway.plugins</groupId>
+						<artifactId>maven-hsqldb-plugin</artifactId>
+						<!-- version 1.0.1 supports hsqldb 2.3.2 -->
+						<version>1.0.1</version>
+						<executions>
+							<execution>
+								<id>user-database-start</id>
+								<phase>test</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<deleteOnEntry>true</deleteOnEntry>
+									<dbName>${project.basedir}/src/test/resources/database/data/transitime_test</dbName>
+									<port>9001</port>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<version>1.1.1</version>
+						<executions>
+							<execution>
+								<phase>test</phase>
+								<id>test-case-execution</id>
+								<goals>
+									<goal>java</goal>
+								</goals>
+								<configuration>
+									<mainClass>org.transitclock.applications.PredictionsAccuracyIntegrationTest</mainClass>
+									<commandlineArgs>-c
+										transitime/src/test/resources/transiTimeConfigIntegrationTest.xml
+										-gtfsDirectoryName transitime/src/test/resources/wmata_gtfs
+										-storeNewRevs -maxTravelTimeSegmentLength 1000</commandlineArgs>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 	</profiles>
 </project>

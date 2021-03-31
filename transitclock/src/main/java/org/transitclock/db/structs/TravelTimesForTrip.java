@@ -28,6 +28,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OrderColumn;
@@ -102,7 +103,9 @@ public class TravelTimesForTrip implements Serializable {
 	private final String tripCreatedForId;
 	
 	@ManyToMany(fetch=FetchType.EAGER)
-	@JoinTable(name="TravelTimesForTrip_to_TravelTimesForPath_joinTable")
+	@JoinTable(name="TravelTimesForTrip_to_TravelTimesForPath_joinTable",
+			joinColumns=@JoinColumn(name="traveltimesfortrips_id", referencedColumnName="id"),
+            inverseJoinColumns=@JoinColumn(name="traveltimesforstoppaths_id", referencedColumnName="id"))
 	@Cascade({CascadeType.SAVE_UPDATE})
 	@OrderColumn(name="listIndex")
 	private final List<TravelTimesForStopPath> travelTimesForStopPaths = 

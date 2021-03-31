@@ -31,7 +31,10 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -40,9 +43,15 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.hibernate.boot.Metadata;
+import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.dialect.MySQLDialect;
+import org.hibernate.service.ServiceRegistry;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
+import org.hibernate.tool.hbm2ddl.SchemaExport.Action;
+import org.hibernate.tool.schema.TargetType;
 
 import com.google.common.reflect.ClassPath;
 
@@ -68,9 +77,10 @@ import com.google.common.reflect.ClassPath;
  *
  */
 public class SchemaGenerator {
-	private final Configuration cfg;
+	
 	private final String packageName;
 	private final String outputDirectory;
+	private static List<Class<Object>> classList=null;
 	
 	private static final Logger logger =
 			LoggerFactory.getLogger(SchemaGenerator.class);
@@ -96,11 +106,10 @@ public class SchemaGenerator {
 
 	@SuppressWarnings("unchecked")
 	public SchemaGenerator(String packageName, String outputDirectory) throws Exception {
-		this.cfg = new Configuration();
-		this.cfg.setProperty("hibernate.hbm2ddl.auto", "create");
-
+		
+		classList=new ArrayList<Class<Object>>();
 		for (Class<Object> clazz : getClasses(packageName)) {
-			this.cfg.addAnnotatedClass(clazz);
+			classList.add(clazz);
 		}
 		
 		this.packageName = packageName;
@@ -151,24 +160,13 @@ public class SchemaGenerator {
 				// Filter out the alter table commands where dropping a key or
 				// a constraint
 				if (line.contains("alter table")) {
-					String nextLine = reader.readLine();
-					if (nextLine.contains("drop")) {
-						// Need to continue reading until process a blank line
-						while (reader.readLine().length() != 0);
+					
+					if (line.contains("drop")) {
+						 
 						
 						// Continue to next line since filtering out drop commands
 						continue;					
-					} else {
-						// It is an "alter table" command but not a "drop". 
-						// Therefore need to keep this command. Since read in
-						// two lines need to handle this specially and then
-						// continue
-						writer.write(line);
-						writer.write("\n");
-						writer.write(nextLine);
-						writer.write("\n");
-						continue;
-					}
+					} 
 				}
 				
 				// Line not being filtered so write it to the file
@@ -207,10 +205,12 @@ public class SchemaGenerator {
 	 * @param dbDialect to use
 	 */
 	private void generate(Dialect dialect) {
-		cfg.setProperty("hibernate.dialect", dialect.getDialectClass());
-
-		SchemaExport export = new SchemaExport(cfg);
-		export.setDelimiter(";");
+		
+		Map<String, String> settings = new HashMap<>();
+		settings.put("hibernate.dialect",  dialect.getDialectClass());
+		
+		ServiceRegistry serviceRegistry = 
+			      new StandardServiceRegistryBuilder().applySettings(settings).build();
 		
 		// Determine file name. Use "ddl_" plus dialect name such as mysql or
 		// oracle plus the package name with "_" replacing "." such as
@@ -221,11 +221,23 @@ public class SchemaGenerator {
 				"ddl_" + dialect.name().toLowerCase() + 
 				"_" + packeNameSuffix + ".sql";
 		
-		export.setOutputFile(outputFilename);
-		
 		// Export, but only to an SQL file. Don't actually modify the database
-		System.out.println("Writing file " + outputFilename);
-		export.execute(true, false, false, false);
+		System.out.println("Writing file " + outputFilename);		
+		
+		MetadataSources metadatasource = new MetadataSources(serviceRegistry);
+							
+		for(Class<Object> annotatedClass:classList)
+		{
+			metadatasource.addAnnotatedClass( annotatedClass);
+		}
+		
+		Metadata metadata =metadatasource.buildMetadata();
+		
+	    new SchemaExport().setDelimiter(";") //
+	            .setOutputFile(outputFilename)
+	            .create(EnumSet.of(TargetType.SCRIPT), metadata);
+	 
+	    metadata.buildSessionFactory().close();
 		
 		// Get rid of unneeded SQL for dropping tables and keys and such
 		trimCruftFromFile(outputFilename);

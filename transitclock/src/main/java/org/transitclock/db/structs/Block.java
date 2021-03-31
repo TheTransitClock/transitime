@@ -49,6 +49,7 @@ import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.collection.internal.PersistentList;
 import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.internal.SessionImpl;
 import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
@@ -837,7 +838,7 @@ public final class Block implements Serializable {
 					// Get the current session associated with the trips.
 					// Can be null.
 					PersistentList persistentListTrips = (PersistentList) trips;
-					SessionImplementor session = 
+					SharedSessionContractImplementor session = 
 							persistentListTrips.getSession();
 
 					// If the session is different from the global
@@ -902,7 +903,7 @@ public final class Block implements Serializable {
 					// but still got exception "Illegal attempt to associate
 					// a collection with two open sessions"
 					PersistentList persistentListTrips = (PersistentList) trips;
-					SessionImplementor sessionImpl =
+					SharedSessionContractImplementor sessionImpl =
 							persistentListTrips.getSession();
 					SessionImpl session = (SessionImpl) sessionImpl;
 					if (!session.isClosed()) {

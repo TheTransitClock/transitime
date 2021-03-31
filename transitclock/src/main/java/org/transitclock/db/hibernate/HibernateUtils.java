@@ -32,7 +32,7 @@ import org.hibernate.service.ServiceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.transitclock.configData.DbSetupConfig;
-import org.hibernate.service.ServiceRegistryBuilder;
+
 
 /**
  * Utilities for dealing with Hibernate issues such as sessions.

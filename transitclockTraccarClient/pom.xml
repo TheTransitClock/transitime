@@ -1,11 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>TheTransitClock</groupId>
 	<artifactId>transitclockTraccarClient</artifactId>
-	<version>2.0.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
-
+	<parent>
+	    <groupId>TheTransitClock</groupId>
+	  	<artifactId>transitclock</artifactId>
+	  	<version>2.0.0-SNAPSHOT</version>
+  	</parent>
 	<name>transitclockTraccarClient</name>
 	<url>http://maven.apache.org</url>
 	<build>
@@ -48,8 +50,8 @@
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>2.5.1</version>
 					<configuration>
-						<source>1.7</source>
-						<target>1.7</target>
+						<source>11</source>
+						<target>11</target>
 					</configuration>
 				</plugin>
 				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->

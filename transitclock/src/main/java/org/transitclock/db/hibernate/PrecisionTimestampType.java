@@ -25,6 +25,7 @@ import java.util.Date;
 
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.type.TimestampType;
 import org.hibernate.usertype.UserType;
 
@@ -104,13 +105,15 @@ public class PrecisionTimestampType implements UserType {
 	public boolean isMutable() {
 		return false;
 	}
+	
+
 
 	/* (non-Javadoc)
 	 * @see org.hibernate.usertype.UserType#nullSafeGet(java.sql.ResultSet, java.lang.String[], org.hibernate.engine.spi.SessionImplementor, java.lang.Object)
 	 */
 	@Override
 	public Object nullSafeGet(ResultSet rs, String[] names,
-			SessionImplementor session, Object owner)
+			SharedSessionContractImplementor session, Object owner)
 			throws HibernateException, SQLException {
 		assert names.length == 1;
 		
@@ -129,7 +132,7 @@ public class PrecisionTimestampType implements UserType {
 	 */
 	@Override
 	public void nullSafeSet(PreparedStatement st, Object value, int index,
-			SessionImplementor session) throws HibernateException, SQLException {
+			SharedSessionContractImplementor session) throws HibernateException, SQLException {
 		if ( value != null ) {
 //			System.out.println("value.class=" + value.getClass().getName());
 //			System.out.println("value=" + value);
@@ -166,5 +169,7 @@ public class PrecisionTimestampType implements UserType {
 	public Class<?> returnedClass() {
 		return Timestamp.class;
 	}
+
+	
 
 }

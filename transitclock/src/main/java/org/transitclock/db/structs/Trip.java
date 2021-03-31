@@ -42,6 +42,7 @@ import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.collection.internal.PersistentList;
 import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.classic.Lifecycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1023,7 +1024,7 @@ public class Trip implements Lifecycle, Serializable {
 	    // TODO this is an anti-pattern
 	    // instead find a way to manage sessions more consistently 
 	    PersistentList persistentListTimes = (PersistentList)scheduledTimesList;
-	    SessionImplementor session = 
+	    SharedSessionContractImplementor session = 
           persistentListTimes.getSession();
 	    if (session == null) {
 	      Session globalLazyLoadSession = Core.getInstance().getDbConfig().getGlobalSession();

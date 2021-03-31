@@ -6,7 +6,9 @@
   <version>2.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>transitclock</name>
+  
   <url>http://www.transitclock.org//</url>
+
   <modules>
     <module>transitclock</module>
     <module>transitclockApi</module>
