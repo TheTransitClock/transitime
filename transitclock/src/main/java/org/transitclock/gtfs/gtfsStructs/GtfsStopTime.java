@@ -137,7 +137,7 @@ public class GtfsStopTime extends CsvBase implements Comparable<GtfsStopTime> {
 		dropOffType = getOptionalValue(record, "drop_off_type");
 		
 		String shapeDistTraveledStr = getOptionalValue(record, "shape_dist_traveled");
-		shapeDistTraveled = shapeDistTraveledStr == null ? 
+		shapeDistTraveled = shapeDistTraveledStr == null || shapeDistTraveledStr.trim().isEmpty() ? 
 				null : Double.parseDouble(shapeDistTraveledStr);
 		
 		timepointStop = getOptionalBooleanValue(record, "timepoint");
