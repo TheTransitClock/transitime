@@ -1,9 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page import="org.transitclock.utils.web.WebUtils" %>
+<%@page import="java.util.ResourceBundle" %>
+<%@page import="java.util.Locale" %>
 <%@page import="org.transitclock.db.webstructs.WebAgency"%>
 <%     
 // Determine all the parameters from the query string
+ResourceBundle labels = ResourceBundle.getBundle("org.transitclock.i18n.text", request.getLocale());
 
 // Determine agency using "a" param
 String agencyId = request.getParameter("a");
@@ -13,7 +16,7 @@ String agencyId = request.getParameter("a");
 String routeIds[] = request.getParameterValues("r");
 String titleRoutes = "";
 if (routeIds != null && !routeIds[0].isEmpty()) {
-    titleRoutes += ", route ";
+    titleRoutes += ", " + labels.getString("PredictionAccuracyRangeForRoute");
     if (routeIds.length > 1) 
         titleRoutes += "s";
     titleRoutes += routeIds[0];
@@ -25,18 +28,21 @@ if (routeIds != null && !routeIds[0].isEmpty()) {
 
 String sourceParam = request.getParameter("source");
 String source = (sourceParam != null && !sourceParam.isEmpty()) ? 
-	", " + sourceParam + " predictions" : ""; 
+	request.getLocale().toString() == "pl_PL" ? 
+			", " + labels.getString("Predictions") + " " + sourceParam 
+			: ", " + sourceParam + " " + labels.getString("Predictions") 
+		: ""; 
 String beginDate = request.getParameter("beginDate");
 String numDays = request.getParameter("numDays");
 if (numDays == null) numDays = "1";
 String beginTime = request.getParameter("beginTime");
 String endTime = request.getParameter("endTime");
 
-String chartTitle = "Prediction Accuracy Range for " 
+String chartTitle = labels.getString("PredictionAccuracyRangeFor") + " " 
     + WebAgency.getCachedWebAgency(agencyId).getAgencyName()   
 	+ titleRoutes 
 	+ source 
-	+ ", " + beginDate + " for " + numDays + " day" + (Integer.parseInt(numDays) > 1 ? "s" : "");
+	+ ", " + beginDate + " " + labels.getString("div.for") + " " + numDays + " " + (Integer.parseInt(numDays) > 1 ? labels.getString("Days") : labels.getString("DayGenitive"));
 	
 if ((beginTime != null && !beginTime.isEmpty()) || (endTime != null && !endTime.isEmpty())) {
 	chartTitle += ", " + beginTime + " to " + endTime;
@@ -129,7 +135,7 @@ function getDataTable() {
      // When there is an AJAX problem alert the user
      error: function(request, status, error) {
         console.log(request.responseText)
-        var msg = $("<p>").html("<br>No data for requested parameters. Hit back button to try other parameters.")
+        var msg = $("<p>").html("<br><fmt:message key='NoDataForParameters' />")
      	$("#errorMessage").append(msg);
         $("#errorMessage").fadeIn("slow");
        },
@@ -152,7 +158,7 @@ function drawChart() {
 	            	// Make chart a bit graay so that it stands out
 	            	backgroundColor: '#f2f2f2'},
 	         hAxis: {
-	            	title: 'Prediction Length (minutes)',
+	            	title: '<fmt:message key="PredictionLengthInMinutes" />',
 	            	// So that last column is labeled
 	            	maxValue: 15,
 	            	// Want a gridline for every minute, not just the default of 5 gridlines
@@ -161,7 +167,7 @@ function drawChart() {
 	            	minorGridlines: {count: 1}
 	       	    },
 	         vAxis: {
-	        	 title: '% of Predictions Within Range',
+	        	 title: '<fmt:message key="PredictionsWithinRange" />',
 	        	 maxValue: 100,
 	        	 // Specify ticks so that when column adds up to just over 100% the horizontal
 	        	 // part of chart not increased to 120% to accomodate it.
@@ -187,10 +193,10 @@ function parseSummary(data) {
 		results.push(d);
 	});
 	document.getElementById('summary').innerHTML = "Schedule Adherence over " + results[0] + " arrival and departures<br/>"
-	+ "Early: <b>" + results[1]
-	+ "</b>% OnTime: <b>" + results[2] 
-	+ "</b>% Late: <b>" + results[3] + "</b>%";
-	
+	+ "<fmt:message key='div.cearly' />" + ": <b>" + results[1] 
+	+ "</b>% <fmt:message key='div.contime' />: <b>" + results[2] 
+	+ "</b>% <fmt:message key='div.clate' />: <b>" + results[3] + "</b>%";
+
 }
 
 function formatQueryParams() {
@@ -201,7 +207,7 @@ function showSummary() {
 	$("#summary").show();
 	$.get("data/summaryScheduleAdherence.jsp?"+formatQueryParams(), parseSummary)
 	.fail(function() {
-		document.getElementById('summary').innerHTML ="Error!";
+		document.getElementById('summary').innerHTML ="<fmt:message key='div.error' />";
 	});
 }
 

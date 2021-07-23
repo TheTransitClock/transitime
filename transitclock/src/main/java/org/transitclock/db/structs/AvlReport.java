@@ -171,6 +171,7 @@ public class AvlReport implements Serializable {
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	String field1Value;
 	
+	private String vehicleName;
 	
 	// How long the AvlReport source field can be in db
 	private static final int SOURCE_LENGTH = 10;
@@ -212,6 +213,7 @@ public class AvlReport implements Serializable {
 		passengerFullness = null;
 		field1Name = null;
 		field1Value = null;
+		vehicleName = null;
 	}
 	
 	/**
@@ -254,6 +256,54 @@ public class AvlReport implements Serializable {
 		this.passengerFullness = null;
 		this.field1Name = null;
 		this.field1Value = null;
+		
+		// Don't yet know when processed so set timeProcessed to null
+		this.timeProcessed = null;
+	}
+	
+	/**
+	 * Constructor for an AvlReport object that is not yet being processed.
+	 * Since not yet being processed timeProcessed is set to null.
+	 * 
+	 * @param vehicleId
+	 *            ID of the vehicle
+	 * @param vehicleName
+	 *            Name of the vehicle
+	 * @param time
+	 *            Epoch time in msec of GPS report (not when processed)
+	 * @param lat
+	 *            Latitude in decimal degrees
+	 * @param lon
+	 *            Longitude in decimal degrees
+	 * @param speed
+	 *            Speed of vehicle in m/s. Should be set to Float.NaN if speed
+	 *            not available
+	 * @param heading
+	 *            Heading of vehicle in degrees clockwise from north. Should be
+	 *            set to Float.NaN if speed not available
+	 * @param source
+	 *            Text describing the source of the report
+	 */
+	public AvlReport(String vehicleId, String vehicleName, long time, double lat, double lon, 
+			float speed, float heading, String source) {
+		// Store the values
+		this.vehicleId = vehicleId;
+		this.time = new Date(time);
+		this.location = new Location(lat, lon);
+		// DB requires null instead of NaN
+		this.speed = Float.isNaN(speed) ? null : speed;
+		this.heading = Float.isNaN(heading) ? null : heading;
+		this.source = sized(source);
+		this.assignmentId = null;
+		this.assignmentType = AssignmentType.UNSET;
+		this.leadVehicleId = null;
+		this.driverId = null;
+		this.licensePlate = null;
+		this.passengerCount = null;
+		this.passengerFullness = null;
+		this.field1Name = null;
+		this.field1Value = null;
+		this.vehicleName = vehicleName;
 		
 		// Don't yet know when processed so set timeProcessed to null
 		this.timeProcessed = null;
@@ -1029,6 +1079,16 @@ public class AvlReport implements Serializable {
 
 	public String getField1Value() {
 		return field1Value;
+	}
+	
+	
+
+	public String getVehicleName() {
+		return vehicleName;
+	}
+
+	public void setVehicleName(String vehicleName) {
+		this.vehicleName = vehicleName;
 	}
 
 	/**

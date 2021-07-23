@@ -1,6 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page import="org.transitclock.utils.web.WebUtils" %>
+<%@page import="java.util.ResourceBundle" %>
+<%@page import="java.util.Locale" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -53,6 +55,7 @@
   <div id="subtitle"></div>
   <div class="chart_div" id="chart_direction_div_0"></div>
   <div class="chart_div" id="chart_direction_div_1"></div>
+  <div class="chart_div" id="chart_direction_div_undefined"></div>
   <div id="loading"></div>
   <div id="errorMessage"></div>
 </body>
@@ -66,9 +69,10 @@
 	  var vertSpaceForChart = (numberOfStops + 1) * 22;
 	  var chartDivHeight = vertSpaceForTitleAndHAxis + vertSpaceForChart;
       $("#" + divId).height(chartDivHeight);
+      var directionTitle = (directionId == 0 || directionId == 1) ? '<fmt:message key="div.ddirection" />' + ': ' + directionId : '';
       
         var options = {
-          title: 'Direction: ' + directionId, 
+          title: directionTitle,
           titleTextStyle: {
         	 fontSize: 22,
         	 bold: false
@@ -123,11 +127,11 @@
   function createDataTableAndDrawChartForDirection(stopsData) {
 	  // Initialize dataArray with the column info
 	  var dataArray = [[
-	                  'Stop', 
-	                  'Late',    {role: 'style'}, { role: 'tooltip'}, { role: 'annotation'},
-	                  'On Time', {role: 'style'}, { role: 'tooltip'}, { role: 'annotation'},
-	                  'Early',   {role: 'style'}, { role: 'tooltip'}, { role: 'annotation'}
-	                  ]];
+          			  '<fmt:message key="div.dstop" />', 
+          			  '<fmt:message key="div.clate" />',    {role: 'style'}, { role: 'tooltip'}, { role: 'annotation'},
+          			  '<fmt:message key="div.contime" />', {role: 'style'}, { role: 'tooltip'}, { role: 'annotation'},
+          			  '<fmt:message key="div.cearly" />',   {role: 'style'}, { role: 'tooltip'}, { role: 'annotation'}
+          			  ]];
 	  
 	  // Add data for each route to the dataArray
 	  var totalEarly = 0;
@@ -142,15 +146,15 @@
 		             stop.stop_name + ' ', 
 		             latePercent, 
 		             	'opacity: 1.0', 
-		             	'Late: ' + stop.late + ' out of ' + stop.total + ' times', 
+		             	'<fmt:message key="div.clate" />' + ': ' + stop.late + ' ' + '<fmt:message key="div.coutof" />' + ' ' + stop.total + ' ' + '<fmt:message key="div.ctimes" />', 
 		             	stop.late > 0 ? latePercent.toFixed(1) + '%' : '',
 		             ontimePercent, 
 		             	'opacity: 1.0', 
-		             	'On time: ' + stop.ontime + ' out of ' + stop.total + ' times', 
+		             	'<fmt:message key="div.contime" />' + ': ' + stop.ontime + ' ' + '<fmt:message key="div.coutof" />' + ' ' + stop.total + ' ' + '<fmt:message key="div.ctimes" />', 
 		             	stop.ontime > 0 ? ontimePercent.toFixed(1) + '%' : '',
 			         earlyPercent, 
 		             	'opacity: 1.0', 
-		             	'Early: ' + stop.early + ' out of ' + stop.total + ' times', 
+		             	'<fmt:message key="div.cearly" />' + ': ' + stop.early + ' ' + '<fmt:message key="div.coutof" />' + ' ' + stop.total + ' ' + '<fmt:message key="div.ctimes" />', 
 		             	(stop.early > 0) ? earlyPercent.toFixed(1) + '%' : ''
 		             ];
 		  dataArray.push(dataArrayForStop);
@@ -169,15 +173,15 @@
 	     		 'Total: ',
 	     		 latePercent, 
 	     		 	'opacity: 1.0', 
-	     		 	'Late: ' + totalLate + ' out of ' + totalTotal + ' times', 
+	     		 	'<fmt:message key="div.clate" />' + ': ' + totalLate + ' ' + '<fmt:message key="div.coutof" />' + ' ' + totalTotal + ' ' + '<fmt:message key="div.ctimes" />', 
 	     		 	latePercent.toFixed(1) + '%',
 		     	 ontimePercent, 
 		     	 	'opacity: 1.0', 
-		     	 	'On time: ' + totalOntime + ' out of ' + totalTotal + ' times', 
+		     	 	'<fmt:message key="div.contime" />' + ': ' + totalOntime + ' ' + '<fmt:message key="div.coutof" />' + ' ' + totalTotal + ' ' + '<fmt:message key="div.ctimes" />', 
 		     	 	ontimePercent.toFixed(1) + '%',
 	     		 earlyPercent, 
 	     		 	'opacity: 1.0', 
-	     		 	'Early: ' + totalEarly + ' out of ' + totalTotal + ' times', 
+	     		 	'<fmt:message key="div.cearly" />' + ': ' + totalEarly + ' ' + '<fmt:message key="div.coutof" />' + ' ' + totalTotal + ' ' + '<fmt:message key="div.ctimes" />', 
 	     		 	earlyPercent.toFixed(1) + '%'
 	     		 ];
 	  dataArray.push(dataArrayForStop);		  
@@ -226,11 +230,12 @@
 	var routeName = routeData.routes[0].name;
 		
 	  <%
-	  String dateRange = request.getParameter("beginDate") + " (+" + request.getParameter("numDays") + " days)";
-	  String allowableEarly = request.getParameter("allowableEarly");;
-	  String allowableLate = request.getParameter("allowableLate");;
+	  ResourceBundle labels = ResourceBundle.getBundle("org.transitclock.i18n.text", request.getLocale());
+	  String dateRange = request.getParameter("beginDate") + " (+" + request.getParameter("numDays") + " " + labels.getString("Days") + ")";
+	  String allowableEarly = request.getParameter("allowableEarly");
+	  String allowableLate = request.getParameter("allowableLate");
 	  String chartParams = 
-	    allowableEarly + " min early to " + allowableLate + " min late</br>" 
+	    allowableEarly + " " + labels.getString("MinEarlyTo") + " " + allowableLate + " " + labels.getString("div.minlate") + "<br>"
 		+ dateRange;
 	  
 	  String beginTime = request.getParameter("beginTime");
@@ -240,11 +245,11 @@
 			  beginTime = "00:00"; // default value
 		  if (endTime.isEmpty())
 			  endTime = "24:00";   // default value
-		  chartParams += ", " + beginTime + " to " + endTime;
+		  chartParams += ", " + beginTime + " " + labels.getString("To") + " "  + endTime;
 	  }
 	%>
 	  
-	$("#title").html('Schedule Adherence for ' + routeName);
+	$("#title").html('<fmt:message key="ScheduleAdherenceFor" />' + ' ' + routeName);
 	$("#subtitle").html('<%= chartParams %>');
   }
   
@@ -266,7 +271,7 @@
 	    // When there is an AJAX problem alert the user
 	    error: function(request, status, error) {
 	     	console.log(request.responseText)
-            var msg = $("<p>").html("<br>No data for requested parameters. Hit back button to try other parameters.")
+            var msg = $("<p>").html("<br><fmt:message key='NoDataForParameters' />")
             $("#errorMessage").append(msg);
 	        $("#errorMessage").fadeIn("fast");
 	        $("#loading").fadeOut("slow");

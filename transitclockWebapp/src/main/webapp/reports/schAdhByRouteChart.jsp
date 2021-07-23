@@ -1,6 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page import="org.transitclock.utils.web.WebUtils" %>
+<%@page import="java.util.ResourceBundle" %>
+<%@page import="java.util.Locale" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -50,11 +52,12 @@
   <%@include file="/template/header.jsp" %>
   
 <%
-  String dateRange = request.getParameter("beginDate") + " (+" + request.getParameter("numDays") + " days)";
-  String allowableEarly = request.getParameter("allowableEarly");;
-  String allowableLate = request.getParameter("allowableLate");;
-  String chartSubtitle = allowableEarly + " min early to " 
-  	+ allowableLate + " min late<br>" + dateRange;
+  ResourceBundle labels = ResourceBundle.getBundle("org.transitclock.i18n.text", request.getLocale());
+  String dateRange = request.getParameter("beginDate") + " (+" + request.getParameter("numDays") + " " + labels.getString("Days") + ")";
+  String allowableEarly = request.getParameter("allowableEarly");
+  String allowableLate = request.getParameter("allowableLate");
+  String chartSubtitle = allowableEarly + " " + labels.getString("MinEarlyTo") + " " 
+  	+ allowableLate + " " + labels.getString("div.minlate") + "<br>" + dateRange;
 
   String beginTime = request.getParameter("beginTime");
   String endTime = request.getParameter("endTime");
@@ -63,11 +66,10 @@
 		  beginTime = "00:00"; // default value
 	  if (endTime.isEmpty())
 		  endTime = "24:00";   // default value
-      chartSubtitle += ", " + beginTime + " to " + endTime;
+      chartSubtitle += ", " + beginTime + " " + labels.getString("To") + " "  + endTime;
   }  
 %>
-
-  <div id="title">Schedule Adherence by Route</div>
+  <div id="title"><fmt:message key="div.scheduleroutr" /></div>
   <div id="subtitle"><%= chartSubtitle %></div>
   <div id="chart_div"></div>
   <div id="loading"></div>
@@ -136,10 +138,10 @@ var globalNumberOfRoutes;
   function createDataTableAndDrawChart(jsonData) {
 	  // Initialize dataArray with the column info
 	  var dataArray = [[
-	                  'Route', 
-	                  'Late',    {role: 'style'}, { role: 'tooltip'}, { role: 'annotation'},
-	                  'On Time', {role: 'style'}, { role: 'tooltip'}, { role: 'annotation'},
-	                  'Early',   {role: 'style'}, { role: 'tooltip'}, { role: 'annotation'}
+	                  '<fmt:message key="div.droute" />', 
+	                  '<fmt:message key="div.clate" />',    {role: 'style'}, { role: 'tooltip'}, { role: 'annotation'},
+	                  '<fmt:message key="div.contime" />', {role: 'style'}, { role: 'tooltip'}, { role: 'annotation'},
+	                  '<fmt:message key="div.cearly" />',   {role: 'style'}, { role: 'tooltip'}, { role: 'annotation'}
 	                  ]];
 	  
 	  // Add data for each route to the dataArray
@@ -155,15 +157,15 @@ var globalNumberOfRoutes;
 		             route.name, 
 		             latePercent, 
 		             	'opacity: 1.0', 
-		             	'Late: ' + route.late + ' out of ' + route.total + ' stops', 
+		             	'<fmt:message key="div.clate" />' + ': ' + route.late + ' ' + '<fmt:message key="div.coutof" />' + ' ' + route.total + ' ' + '<fmt:message key="Stops" />', 
 		             	route.late > 0 ? latePercent.toFixed(1) + '%' : '',
 		             ontimePercent, 
 		             	'opacity: 1.0', 
-		             	'On time: ' + route.ontime + ' out of ' + route.total + ' stops', 
+		             	'<fmt:message key="div.contime" />' + ': ' + route.ontime + ' ' + '<fmt:message key="div.coutof" />' + ' ' + route.total + ' ' + '<fmt:message key="Stops" />', 
 	             	 	route.ontime > 0 ? ontimePercent.toFixed(1) + '%' : '',
 			         earlyPercent, 
 		             	'opacity: 1.0', 
-		             	'Early: ' + route.early + ' out of ' + route.total + ' stops', 
+		             	'<fmt:message key="div.cearly" />' + ': ' + route.early + ' ' + '<fmt:message key="div.coutof" />' + ' ' + route.total + ' ' + '<fmt:message key="Stops" />', 
 		             	(route.early > 0) ? earlyPercent.toFixed(1) + '%' : ''
 		             ];
 		  dataArray.push(dataArrayForRoute);
@@ -180,18 +182,18 @@ var globalNumberOfRoutes;
 		  var ontimePercent = (100.0 * totalOntime / totalTotal); 
 		  var latePercent = (100.0 * totalLate / totalTotal); 
 		  var dataArrayForRoute = [
-		     		 'Combined',
+		     		 '<fmt:message key="div.ccombined" />',
 		     		 latePercent, 
 		     		 	'opacity: 1.0', 
-		     		 	'Late: ' + totalLate + ' out of ' + totalTotal + ' stops', 
+		     		 	'<fmt:message key="div.clate" />' + ': ' + totalLate + ' ' + '<fmt:message key="div.coutof" />' + ' ' + totalTotal + ' ' + '<fmt:message key="Stops" />', 
 		     		 	latePercent.toFixed(1) + '%',
 			     	 ontimePercent, 
 			     	 	'opacity: 1.0', 
-			     	 	'On time: ' + totalOntime + ' out of ' + totalTotal + ' stops', 
+			     	 	'<fmt:message key="div.contime" />' + ': ' + totalOntime + ' ' + '<fmt:message key="div.coutof" />' + ' ' + totalTotal + ' ' + '<fmt:message key="Stops" />', 
 			     	 	ontimePercent.toFixed(1) + '%',
 		     		 earlyPercent, 
 		     		 	'opacity: 1.0', 
-		     		 	'Early: ' + totalEarly + ' out of ' + totalTotal + ' stops', 
+		     		 	'<fmt:message key="div.cearly" />' + ': ' + totalEarly + ' ' + '<fmt:message key="div.coutof" />' + ' ' + totalTotal + ' ' + '<fmt:message key="Stops" />', 
 		     		 	earlyPercent.toFixed(1) + '%'
 		     		 ];
 		  dataArray.push(dataArrayForRoute);		  
@@ -221,7 +223,7 @@ var globalNumberOfRoutes;
 	    // When there is an AJAX problem alert the user
 	    error: function(request, status, error) {
 	     	console.log(request.responseText)
-            var msg = $("<p>").html("<br>No data for requested parameters. Hit back button to try other parameters.")
+            var msg = $("<p>").html("<br><fmt:message key='NoDataForParameters' />")
             $("#errorMessage").append(msg);;
 	        $("#errorMessage").fadeIn("fast");
 	        $("#loading").fadeOut("slow");

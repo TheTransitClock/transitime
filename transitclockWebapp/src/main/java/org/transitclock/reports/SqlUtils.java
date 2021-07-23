@@ -17,6 +17,7 @@
 package org.transitclock.reports;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -215,8 +216,16 @@ public class SqlUtils {
 				numDays = maxNumDays;
 			String sql = null;
 			if (isMysql) {
-			  sql = " AND " + timeColumnName + " BETWEEN '" + beginDate
-	          + "' " + " AND DATE_ADD(STR_TO_DATE('" + beginDate + "', '%Y-%m-%d'), INTERVAL "
+				String reformattedBeginDate = beginDate;
+				SimpleDateFormat currentFormat = new SimpleDateFormat("MM-dd-yyyy");
+				SimpleDateFormat requiredFormat = new SimpleDateFormat("yyyy-MM-dd");
+				try {
+				    reformattedBeginDate = requiredFormat.format(currentFormat.parse(beginDate));
+				} catch (ParseException e) {
+				    e.printStackTrace();
+				}
+			  sql = " AND " + timeColumnName + " BETWEEN '" + reformattedBeginDate
+	          + "' " + " AND DATE_ADD(STR_TO_DATE('" + reformattedBeginDate + "', '%Y-%m-%d'), INTERVAL "
 	          + numDays + " day) " + timeSql + ' ';
 			} else {
 			sql =" AND " + timeColumnName + " BETWEEN '" + beginDate

@@ -262,7 +262,7 @@
         id varchar(60) not null,
         configRev int4 not null,
         color varchar(10),
-        description varchar(1024),
+        description varchar(2048),
         maxLat float8,
         maxLon float8,
         minLat float8,
@@ -429,6 +429,7 @@
 
     create table VehicleConfigs (
         id varchar(60) not null,
+        name varchar(255),
         capacity int4,
         crushCapacity int4,
         description varchar(255),

@@ -30,7 +30,7 @@ function dataReadCallback(jsonData) {
 
 		// Insert row (after the header)
 		var row = table.insertRow(i+1);
-		row.insertCell(0).innerHTML = vehicleInfo.vehicleId;
+		row.insertCell(0).innerHTML = (vehicleInfo.name === undefined || vehicleInfo.name == '') ? vehicleInfo.vehicleId : vehicleInfo.name;
 		row.insertCell(1).innerHTML = vehicleInfo.maxTime;
 		row.insertCell(2).innerHTML = vehicleInfo.lat;
 		row.insertCell(3).innerHTML = vehicleInfo.lon;
@@ -56,7 +56,7 @@ $( document ).ready(function() {
 <%@include file="/template/header.jsp" %>
 <div id="title"><fmt:message key="div.lgpsr" /></div>
 <table id="dataTable">
-  <tr><th><fmt:message key="div.Vehicle" /></th><th><fmt:message key="div.lgps" /></th></tr>
+  <tr><th><fmt:message key="div.Vehicle" /></th><th><fmt:message key="div.lgps" /></th><th><fmt:message key="div.lat" /></th><th><fmt:message key="div.lon" /></th></tr>
   </table>
 </body>
 </html>

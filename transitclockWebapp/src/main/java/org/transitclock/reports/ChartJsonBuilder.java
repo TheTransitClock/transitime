@@ -79,7 +79,7 @@ public class ChartJsonBuilder {
 		 *            The value of the element to be added to the row
 		 */
 		public void addRowElement(double value) {
-			String rowElement = "{\"v\": " + StringUtils.oneDigitFormat(value)
+			String rowElement = "{\"v\": " + StringUtils.oneDigitFormat(value).replace(",", ".")
 					+ "}";
 			rowElementsList.add(rowElement);
 		}

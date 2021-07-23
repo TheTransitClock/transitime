@@ -18,6 +18,8 @@
 package org.transitclock.reports;
 
 import java.sql.SQLException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.List;
 
@@ -26,6 +28,8 @@ import org.slf4j.LoggerFactory;
 import org.transitclock.reports.ChartJsonBuilder.RowBuilder;
 import org.transitclock.utils.StringUtils;
 import org.transitclock.utils.Time;
+import java.util.ResourceBundle;
+import java.util.Locale;
 
 /**
  * For generating the JSON data for a Google chart for showing percent of
@@ -38,6 +42,8 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(PredAccuracyRangeQuery.class);
+	
+	ResourceBundle labels = ResourceBundle.getBundle("org.transitclock.i18n.text", Locale.getDefault());
 
 	/********************** Member Functions **************************/
 
@@ -85,15 +91,15 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 		}
 
 		builder.addNumberColumn();
-		builder.addNumberColumn("Earlier than predicted (more than " + maxEarlySec + " secs early)");
+		builder.addNumberColumn(labels.getString("EarlierThanPredicted_MoreThan") + " " + maxEarlySec + " " + labels.getString("SecsEarly_"));
 		builder.addTooltipColumn();
-		builder.addNumberColumn("Within Bounds (" + maxEarlySec + " secs early to "
-				+ maxLateSec + " secs late)");
+		builder.addNumberColumn(labels.getString("WithinBounds_") + " " + maxEarlySec + " " + labels.getString("SecsEarlyTo") + " "
+				+ maxLateSec + " " + labels.getString("SecsLate_"));
 		builder.addTooltipColumn();
-		builder.addNumberColumn("Later than predicted (more than " + maxLateSec + " secs late)");
+		builder.addNumberColumn(labels.getString("LaterThanPredicted_MoreThan") + maxLateSec + " " + labels.getString("SecsLate_"));
 		builder.addTooltipColumn();
 	}
-
+	
 	/**
 	 * Adds the row definition in JSON string format so that chart the data
 	 * using Google charts. The row definition contains the actual data.
@@ -154,17 +160,21 @@ public class PredAccuracyRangeQuery extends PredictionAccuracyQuery {
 				rowBuilder.addRowElement(predBucketSecs);
 
 				rowBuilder.addRowElement(tooEarlyPercentage);
-				rowBuilder.addRowElement("Earlier than predicted: " + tooEarly + " points, "
+				
+				
+				ResourceBundle labels = ResourceBundle.getBundle("org.transitclock.i18n.text", Locale.getDefault());
+
+				rowBuilder.addRowElement(labels.getString("EarlierThanPredicted") + ": " + tooEarly + " " + labels.getString("Points") + ", "
 						+ StringUtils.oneDigitFormat(tooEarlyPercentage) + "%");
 
 				rowBuilder.addRowElement(okPercentage);
-				rowBuilder.addRowElement("Within Bounds: " + ok + " points, "
+				rowBuilder.addRowElement(labels.getString("WithinBounds") + ": " + ok + " " + labels.getString("Points") + ", "
 						+ StringUtils.oneDigitFormat(okPercentage) + "%");
 
 				rowBuilder.addRowElement(tooLatePercentage);
-				rowBuilder.addRowElement("Too Late: " + tooLate + " points, "
+				rowBuilder.addRowElement(labels.getString("TooLate") + ": " + tooLate + " " + labels.getString("Points") + ", "
 				    + StringUtils.oneDigitFormat(tooLatePercentage) + "%");
-				rowBuilder.addRowElement("Later than predicted: " + tooLate + " points, "
+				rowBuilder.addRowElement(labels.getString("LaterThanPredicted") + ": " + tooLate + " " + labels.getString("Points") + ", "
 						+ StringUtils.oneDigitFormat(tooLatePercentage) + "%");
 			}
 		}

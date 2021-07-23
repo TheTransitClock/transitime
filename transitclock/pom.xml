@@ -50,7 +50,9 @@
 		<dependency>
 			<groupId>com.simontuffs</groupId>
 			<artifactId>one-jar-boot</artifactId>
-			<version>0.97.3</version>
+			<version>0.97</version>
+			<scope>system</scope>
+			<systemPath>/usr/local/transitclock/bin/one-jar-boot-0.97.jar</systemPath>
 		</dependency>
 
 		<!-- Database related, including c3p0 production quality connector. Note:

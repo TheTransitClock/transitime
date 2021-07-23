@@ -53,6 +53,7 @@ import org.transitclock.utils.Time;
 public class VehicleState {
 
 	private final String vehicleId;
+	private String vehicleName;
 	private Block block;
 	private BlockAssignmentMethod assignmentMethod;
 	// Will be set to block ID (even if used trip to determine assignment) or route ID
@@ -131,6 +132,11 @@ public class VehicleState {
 
 	public VehicleState(String vehicleId) {
 		this.vehicleId = vehicleId;
+	}
+	
+	public VehicleState(String vehicleId, String vehicleName) {
+		this.vehicleId = vehicleId;
+		this.vehicleName = vehicleName;
 	}
 
 	/**
@@ -747,6 +753,10 @@ public class VehicleState {
 	public String getVehicleId() {
 		return vehicleId;
 	}
+	
+	public String getVehicleName() {
+		return vehicleId;
+	}
 
 	public boolean isPredictable() {
 		return predictable;
@@ -956,6 +966,7 @@ public class VehicleState {
 	public String toString() {
 		return "VehicleState ["
 				+ "vehicleId=" + vehicleId
+				+ "vehicleName=" + vehicleName
 				+ ", blockId=" + (block==null? null : block.getId())
 				+ ", assignmentId=" + assignmentId
 				+ ", assignmentMethod=" + assignmentMethod
@@ -976,6 +987,7 @@ public class VehicleState {
 	public String toStringVerbose() {
 		return "VehicleState ["
 				+ "vehicleId=" + vehicleId
+				+ "vehicleName=" + vehicleName
 				+ ", blockId=" + (block==null? null : block.getId())
 				+ ", assignmentId=" + assignmentId
 				+ ", assignmentMethod=" + assignmentMethod

@@ -52,6 +52,8 @@ public class IpcVehicle implements Serializable {
 	public boolean isAtStop() {
 		return isAtStop;
 	}
+	
+	private String vehicleName;
 
 	private final String blockId;
 	private final BlockAssignmentMethod blockAssignmentMethod;
@@ -96,6 +98,7 @@ public class IpcVehicle implements Serializable {
 	 * @param vs
 	 */
 	public IpcVehicle(VehicleState vs) {
+		this.vehicleName = vs.getVehicleName();
 		this.blockAssignmentMethod = vs.getAssignmentMethod();
 		this.avl = new IpcAvl(vs.getAvlReport());
 		this.heading = vs.getHeading();
@@ -257,6 +260,74 @@ public class IpcVehicle implements Serializable {
 		this.predictedLongitude = predictedLongitude;
 
 	}
+	
+	/**
+	 * Constructor used for when deserializing a proxy object. Declared
+	 * protected because only used internally by the proxy class but also for
+	 * sub class.
+	 * 
+	 * @param blockId
+	 * @param blockAssignmentMethod
+	 * @param avl
+	 * @param pathHeading
+	 * @param routeId
+	 * @param routeShortName
+	 * @param routeName
+	 * @param tripId
+	 * @param tripPatternId
+	 * @param directionId
+	 * @param headsign
+	 * @param predictable
+	 * @param schedBasedPred
+	 * @param realTimeSchdAdh
+	 * @param isDelayed
+	 * @param isLayover
+	 * @param layoverDepartureTime
+	 * @param nextStopId
+	 * @param nextStopName
+	 * @param vehicleType
+	 * @param freqStartTime
+	 */
+	protected IpcVehicle(String blockId, String vehicleName,
+			BlockAssignmentMethod blockAssignmentMethod, IpcAvl avl,
+			float heading, String routeId, String routeShortName,
+			String routeName, String tripId, String tripPatternId,
+			String directionId, String headsign, boolean predictable,
+			boolean schedBasedPred, TemporalDifference realTimeSchdAdh,
+			boolean isDelayed, boolean isLayover, long layoverDepartureTime,
+
+			String nextStopId, String nextStopName, String vehicleType, long freqStartTime, boolean isAtStop, IpcHoldingTime holdingTime, double predictedLatitude, double predictedLongitude) {
+
+		this.vehicleName = vehicleName;
+		this.blockId = blockId;
+		this.blockAssignmentMethod = blockAssignmentMethod;
+		this.avl = avl;
+		this.heading = heading;
+		this.routeId = routeId;
+		this.routeShortName = routeShortName;
+		this.routeName = routeName;
+		this.tripId = tripId;
+		this.tripPatternId = tripPatternId;
+		this.directionId = directionId;
+		this.headsign = headsign;
+		this.predictable = predictable;
+		this.schedBasedPred = schedBasedPred;
+		this.realTimeSchedAdh = realTimeSchdAdh;
+		this.isDelayed = isDelayed;
+		this.isLayover = isLayover;
+		this.layoverDepartureTime = layoverDepartureTime;
+		this.nextStopId = nextStopId;
+		this.nextStopName = nextStopName;
+		this.vehicleType = vehicleType;
+
+		this.freqStartTime = freqStartTime;
+		this.isAtStop = isAtStop;
+		this.holdingTime = holdingTime;
+
+		this.predictedLatitude = predictedLatitude;
+		this.predictedLongitude = predictedLongitude;
+
+	}
 
 	/*
 	 * SerializationProxy is used so that this class can be immutable and so
@@ -265,6 +336,7 @@ public class IpcVehicle implements Serializable {
 	protected static class SerializationProxy implements Serializable {
 		// Exact copy of fields of IpcVehicle enclosing class object
 		protected String blockId;
+		protected String vehicleName;
 		protected BlockAssignmentMethod blockAssignmentMethod;
 		protected IpcAvl avl;
 		protected float heading;
@@ -300,6 +372,7 @@ public class IpcVehicle implements Serializable {
 		 * Only to be used within this class.
 		 */
 		protected SerializationProxy(IpcVehicle v) {
+			this.vehicleName = v.vehicleName;
 			this.blockId = v.blockId;
 			this.blockAssignmentMethod = v.blockAssignmentMethod;
 			this.avl = v.avl;
@@ -340,6 +413,7 @@ public class IpcVehicle implements Serializable {
 				throws IOException {
 		    stream.writeShort(currentSerializationVersion);
 		    
+		    stream.writeObject(vehicleName);
 			stream.writeObject(blockId);
 			stream.writeObject(blockAssignmentMethod);
 			stream.writeObject(avl);
@@ -388,6 +462,7 @@ public class IpcVehicle implements Serializable {
 
 			// serialization version is OK so read in object
 			blockId = (String) stream.readObject();
+			vehicleName = (String) stream.readObject();
 			blockAssignmentMethod = (BlockAssignmentMethod) stream.readObject();
 			avl = (IpcAvl) stream.readObject();
 			heading = stream.readFloat();
@@ -422,7 +497,7 @@ public class IpcVehicle implements Serializable {
 		 * object is converted to an enclosing class object.
 		 */
 		private Object readResolve() {
-			return new IpcVehicle(blockId, blockAssignmentMethod, avl, heading,
+			return new IpcVehicle(blockId, vehicleName, blockAssignmentMethod, avl, heading,
 					routeId, routeShortName, routeName, tripId, tripPatternId,
 					directionId, headsign, predictable, schedBasedPred,
 					realTimeSchdAdh, isDelayed, isLayover, layoverDepartureTime,
@@ -589,11 +664,20 @@ public class IpcVehicle implements Serializable {
 	public String getVehicleType() {
 		return vehicleType;		
 	}
+	
+	public String getVehicleName() {
+		return vehicleName;
+	}
+	
+	public void setVehicleName(String vehicleName) {
+		this.vehicleName = vehicleName;
+	}
 
 	@Override
 	public String toString() {
 		return "IpcVehicle [" 
 				+ "vehicleId=" + avl.getVehicleId() 
+				+ ", vehicleName=" + vehicleName
 				+ ", blockId=" + blockId 
 				+ ", blockAssignmentMethod=" + blockAssignmentMethod
 				+ ", routeId=" + routeId 

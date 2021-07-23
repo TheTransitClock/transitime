@@ -44,7 +44,7 @@ int BUCKET_TIME = 30;
 String epochCommandPre = "EXTRACT (EPOCH FROM ";
 String epochCommandPost = ")";
 if (isMysql) {
-  epochCommandPre = "UNIX_TIMESTAMP";
+  epochCommandPre = "";
   epochCommandPost = "";
 }
 String sql =

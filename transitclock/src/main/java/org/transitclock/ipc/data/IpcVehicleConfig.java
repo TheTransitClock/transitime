@@ -35,7 +35,8 @@ public class IpcVehicleConfig implements Serializable {
 	private final Integer capacity;
 	private final Integer crushCapacity;
 	private final Boolean nonPassengerVehicle;
-
+	private final String name;
+	
 	private static final long serialVersionUID = 4172266751162647909L;
 	
 	/********************** Member Functions **************************/
@@ -47,6 +48,7 @@ public class IpcVehicleConfig implements Serializable {
 		this.capacity = vc.getCapacity();
 		this.crushCapacity = vc.getCrushCapacity();
 		this.nonPassengerVehicle = vc.isNonPassengerVehicle();
+		this.name = vc.getName();
 	}
 
 	public String getId() {
@@ -73,6 +75,10 @@ public class IpcVehicleConfig implements Serializable {
 		return nonPassengerVehicle;
 	}
 
+	public String getName() {
+		return name;
+	}
+
 	@Override
 	public String toString() {
 		return "IpcVehicleConfig [" 
@@ -82,6 +88,7 @@ public class IpcVehicleConfig implements Serializable {
 				+ ", capacity=" + capacity
 				+ ", crushCapacity=" + crushCapacity 
 				+ ", nonPassengerVehicle="	+ nonPassengerVehicle 
+				+ ", name=" + name
 				+ "]";
 	}
 }

@@ -27,6 +27,7 @@ import org.transitclock.avl.AmigoCloudAvlModule;
 import org.transitclock.avl.PollUrlAvlModule;
 import org.transitclock.config.StringConfigValue;
 import org.transitclock.db.structs.AvlReport;
+import org.transitclock.db.structs.Location;
 import org.transitclock.db.structs.AvlReport.AssignmentType;
 import io.swagger.client.ApiClient;
 import io.swagger.client.api.DefaultApi;
@@ -91,18 +92,19 @@ public class TraccarAVLModule extends PollUrlAvlModule {
 				Device device=findDeviceById(devices, result.getDeviceId());
 				
 				AvlReport avlReport = null;
+				
 				// If have device details use name.
-				if(device!=null && device.getName()!=null && !device.getName().isEmpty())
+				if(device!=null && device.getUniqueId()!=null && !device.getUniqueId().isEmpty())
 				{
-					 avlReport = new AvlReport(device.getName(),
+					 avlReport = new AvlReport(device.getUniqueId().toString(), device.getName(),
 							result.getDeviceTime().toDate().getTime(), result.getLatitude().doubleValue(),
-							result.getLongitude().doubleValue(), traccarSource.toString());
+							result.getLongitude().doubleValue(), result.getSpeed().floatValue(), result.getCourse().floatValue(), traccarSource.toString());
 				}
 				else
 				{
 					 avlReport = new AvlReport(result.getDeviceId().toString(),
 						result.getDeviceTime().toDate().getTime(), result.getLatitude().doubleValue(),
-						result.getLongitude().doubleValue(), traccarSource.toString());
+						result.getLongitude().doubleValue(), result.getSpeed().floatValue(), result.getCourse().floatValue(), traccarSource.toString());
 				}
 				if(avlReport!=null)
 					avlReportsReadIn.add(avlReport);

@@ -15,6 +15,8 @@
   
   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
   <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+    <script type="text/javascript" src="//leaflet.github.io/Leaflet.label/leaflet.label.js"></script>
+  <link rel="stylesheet" href="//leaflet.github.io/Leaflet.label/leaflet.label.css" />
 
 <style>
 html, body, #map { 
@@ -45,6 +47,8 @@ var vehicleLayer;
  * schedule adherence.
  */
 function getVehiclePopupContent(vehicle) {
+	var vehicleName = (vehicle.vehicleName == '' || vehicle.vehicleName == 'undefined' || 
+			vehicle.vehicleName === undefined) ? vehicle.id : vehicle.vehicleName;
 	var content =
 		"<b><fmt:message key="div.Vehicle" />:</b> " + vehicle.id 
 		+ "<br/><b><fmt:message key="div.droute" />:</b> " + vehicle.routeName;
@@ -131,15 +135,23 @@ function getAndProcessSchAdhData() {
 					    fillOpacity: fillOpacity,
 					};
 					
+					var vehicleName = (vehicle.vehicleName == '' 
+							|| vehicle.vehicleName == 'undefined' 
+							|| vehicle.vehicleName === undefined) ? vehicle.id : vehicle.vehicleName;
+					if (vehicle.schAdhStr)
+						vehicleName += " " + vehicle.schAdhStr;
+					
 					// Create circle for vehicle showing schedule adherence
 					var vehicleMarker = 
 						L.circleMarker([vehicle.loc.lat, vehicle.loc.lon], 
-								vehicleMarkerOptions);
+								vehicleMarkerOptions).bindLabel(vehicleName, {noHide: true, className: "my-label", offset: [12, -14] });
 					newVehicleLayer.addLayer(vehicleMarker);
 					
 					// Store vehicle data obtained via AJAX with stopMarker so it can be used in popup
 					vehicleMarker.vehicle = vehicle;
 					
+					vehicleName = (vehicle.vehicleName == '' || vehicle.vehicleName == 'undefined' || 
+							vehicle.vehicleName === undefined) ? vehicle.id : vehicle.vehicleName;
 					// Create popup window for vehicle when clicked on
 					vehicleMarker.on('click', function(e) {
 						var content = getVehiclePopupContent(this.vehicle);
@@ -211,8 +223,8 @@ function createMap(mapTileUrl, mapTileCopyright) {
 	
 	L.tileLayer(mapTileUrl, {
 		// Specifying a shorter version of attribution. Original really too long.
-	    //attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-	    attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery ©<%= WebConfigParams.getMapTileCopyright() %>',
+	    //attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery ï¿½ <a href="http://mapbox.com">Mapbox</a>',
+	    attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery ï¿½<%= WebConfigParams.getMapTileCopyright() %>',
 	    maxZoom: 19
 	}).addTo(map);
 

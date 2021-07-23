@@ -27,6 +27,7 @@ import javax.persistence.Table;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.hibernate.annotations.DynamicUpdate;
 import org.transitclock.db.hibernate.HibernateUtils;
 
@@ -43,6 +44,9 @@ public class VehicleConfig {
 	@Column(length=HibernateUtils.DEFAULT_ID_SIZE)
 	@Id
 	private final String id;
+	
+	@Column
+	private String name;
 	
 	// Same as vehicle type in GTFS
 	@Column
@@ -87,6 +91,26 @@ public class VehicleConfig {
 		capacity = null;
 		crushCapacity = null;
 		nonPassengerVehicle = null;
+		name = null;
+	}
+	
+	/**
+	 * Constructor for when new vehicle encountered and automatically adding it
+	 * to the db.
+	 * 
+	 * @param id vehicle ID
+	 * @param name vehicle name
+	 *
+	 */
+	public VehicleConfig(String id, String name) {
+		this.id = id;
+		type = null;
+		description = null;
+		trackerId = null;
+		capacity = null;
+		crushCapacity = null;
+		nonPassengerVehicle = null;
+		this.name = name;
 	}
 
 	/**
@@ -101,6 +125,7 @@ public class VehicleConfig {
 		capacity = null;
 		crushCapacity = null;
 		nonPassengerVehicle = null;
+		name = null;
 	}
 
 	/**
@@ -118,10 +143,24 @@ public class VehicleConfig {
 		return query.list();
 	}
 	
+	/**
+	 * Reads List of VehicleConfig objects from database
+	 * 
+	 * @param VehicleConfig, session
+	 * @throws HibernateException
+	 */
+	public static void updateVehicleConfig(VehicleConfig vehicleConfig, Session session) 
+			throws HibernateException {
+		//Transaction tx = session.beginTransaction();
+		session.update(vehicleConfig);
+		//tx.commit();
+	}
+	
 	@Override
 	public String toString() {
 		return "VehicleConfig [" 
 				+ "id=" + id 
+				+ "name=" + name 
 				+ ", type=" + type 
 				+ ", description=" + description
 				+ ", trackerId=" + trackerId
@@ -192,5 +231,15 @@ public class VehicleConfig {
 	public Boolean isNonPassengerVehicle() {
 		return nonPassengerVehicle;
 	}
-	
+
+	/**
+	 * @return the vehicle name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 }

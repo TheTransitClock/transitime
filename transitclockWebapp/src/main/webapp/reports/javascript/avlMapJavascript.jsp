@@ -1,6 +1,13 @@
-//Edit route input width.
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<c:set var="language" value="" scope="session" />
+<fmt:setLocale value="${not empty param.language ? param.language : not empty language ? language : pageContext.request.locale}" />
+<fmt:requestEncoding value = "UTF-8" />
+<fmt:setBundle basename="org.transitclock.i18n.text" />
+    
+<script>
 $("#route").attr("style", "width: 200px");
-	
+
 /* For drawing the route and stops */
 var routeOptions = {
 	color: '#00ee00',
@@ -40,7 +47,8 @@ function drawAvlMarker(avl) {
 	
   	// Create popup with detailed info
 	
-	var labels = ["Vehicles", "GPS Time", "Time Proc", "Lat/Lon", "Speed", "Heading", "Assignment ID"],
+	var labels = ["<fmt:message key='div.Vehicle' />", "<fmt:message key='div.dgpstime' />", "<fmt:message key='TimeProc' />", "Lat/Lon", 
+		"<fmt:message key='div.dspeed' />", "<fmt:message key='div.dheading' />", "<fmt:message key='AssigmentId' />"],
 		keys = ["vehicleId", "time", "timeProcessed", "latlon", "niceSpeed", "heading", "assignmentId"];
 	
 	// populate missing keys
@@ -197,9 +205,10 @@ function createExport(vehicles) {
 //Add a new layer for only route/bus markers, so that it can be refreshed
 //when selections change without having to redraw tiles.
 var map = L.map('map');
+var mapTileUrl = <%=System.getProperty("transitclock.mapTileUrl")%>
 L.control.scale({metric: false}).addTo(map);
-L.tileLayer('http://api.tiles.mapbox.com/v4/transitime.j1g5bb0j/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoidHJhbnNpdGltZSIsImEiOiJiYnNWMnBvIn0.5qdbXMUT1-d90cv1PAIWOQ', {
- attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery Â© <a href="http://mapbox.com">Mapbox</a>',
+L.tileLayer(mapTileUrl, {
+ attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
  maxZoom: 19
 }).addTo(map);
 
@@ -354,5 +363,4 @@ $("#playbackRew").on("click", function() {
 	animate.rate(rate);
 	$("#playbackRate").text(rate + "X");
 });
-
-
+</script>

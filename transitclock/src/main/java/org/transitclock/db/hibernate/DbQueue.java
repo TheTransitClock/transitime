@@ -14,6 +14,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.exception.JDBCConnectionException;
 import org.hibernate.exception.SQLGrammarException;
@@ -325,21 +326,24 @@ public class DbQueue<T> {
 						processSingleObject(o);
 						shouldKeepTrying = false;
 					} catch (HibernateException e2) {
-						// Need to know if it is a problem with the database not
-						// being accessible or if there is a problem with the SQL/data.
-						// If there is a problem accessibility of the database then
-						// want to keep trying writing the old data. But if it is
-						// a problem with the SQL/data then only want to try to write
-						// the good data from the batch a single time to make sure 
-						// all good data is written.
-						if (shouldKeepTryingBecauseConnectionException(e2)) {
-							shouldKeepTrying = true;
-							logger.error("Encountered database connection " +
-									"exception so will sleep for {} msec and " +
-									"will then try again.", TIME_BETWEEN_RETRIES);
-							Time.sleep(TIME_BETWEEN_RETRIES);
+						if(e instanceof ConstraintViolationException && e2 instanceof GenericJDBCException) {
+							shouldKeepTrying = false;
+						} else {
+							// Need to know if it is a problem with the database not
+							// being accessible or if there is a problem with the SQL/data.
+							// If there is a problem accessibility of the database then
+							// want to keep trying writing the old data. But if it is
+							// a problem with the SQL/data then only want to try to write
+							// the good data from the batch a single time to make sure 
+							// all good data is written.
+							if (shouldKeepTryingBecauseConnectionException(e2)) {
+								shouldKeepTrying = true;
+								logger.error("Encountered database connection " +
+										"exception so will sleep for {} msec and " +
+										"will then try again.", TIME_BETWEEN_RETRIES);
+								Time.sleep(TIME_BETWEEN_RETRIES);
+							}
 						}
-						
 						// Output message on what is going on
 						Throwable cause2 = HibernateUtils.getRootCause(e2);
 						logger.error(e2.getClass().getSimpleName() + " when individually writing object " +

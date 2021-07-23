@@ -44,11 +44,12 @@ if (agencyId == null || agencyId.isEmpty()) {
 	      // Go through all service classes and directions for route
     	  for (var i=0; i<jsonData.schedule.length; ++i) {
     		  var schedule = jsonData.schedule[i];
+    		  var directionText = (schedule.directionId === undefined) ? '<fmt:message key="Undefined" />' : schedule.directionId;
     		  
     		  // Create title for schedule
     		  $('body').append("<div id='scheduleTitle'>" 
-                      + '<fmt:message key="div.ddirection" /> ' + schedule.directionId 
-    				  + ", Service: " + schedule.serviceName
+                      + '<fmt:message key="div.ddirection" /> ' + directionText 
+    				  + ", " + '<fmt:message key="div.Service" />' + " " + schedule.serviceName
     				  + "</div>");
 
     		  var table = $("<table id='dataTable'></table>").appendTo('body')[0];

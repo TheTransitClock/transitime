@@ -60,6 +60,6 @@
 var request = {<%= WebUtils.getAjaxDataString(request) %>},
 	contextPath = "<%= request.getContextPath() %>";
 </script>
-<script src="<%= request.getContextPath() %>/map/javascript/avlMap.js"></script>
+<jsp:include page="javascript/avlMapJavascript.jsp" />
 </html>
 

@@ -19,13 +19,14 @@
 
 <script>
 
-$.getJSON(apiUrlPrefix + "/command/vehicleIds", 
+$.getJSON(apiUrlPrefix + "/command/vehicleConfigs", 
  		function(vehicles) {
 	        // Generate list of routes for the selector
-	 		var selectorData = [{id: '', text: 'All Vehicles'}];
-	 		for (var i in vehicles.ids) {
-	 			var id = vehicles.ids[i];
-	 			selectorData.push({id: id, text: id})
+	 		var selectorData = [{id: '', text: '<fmt:message key="AllVehicles" />'}];
+	 		for (var i in vehicles.vehicleConfig) {
+	 			var id = vehicles.vehicleConfig[i].id;
+	 			var name = (vehicles.vehicleConfig[i].name === undefined || vehicles.vehicleConfig[i].name == '') ? vehicles.vehicleConfig[i].id : vehicles.vehicleConfig[i].name;
+	 			selectorData.push({id: id, text: name})
 	 		}
 	 		
 	 		// Configure the selector to be a select2 one that has

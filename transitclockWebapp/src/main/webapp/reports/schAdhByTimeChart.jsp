@@ -1,6 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page import="org.transitclock.utils.web.WebUtils" %>
+<%@page import="java.util.ResourceBundle" %>
+<%@page import="java.util.Locale" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
   <head>
@@ -50,11 +52,12 @@
     <%@include file="/template/header.jsp" %>
   
   <%
-  String dateRange = request.getParameter("beginDate") + " (+" + request.getParameter("numDays") + " days)";
-  String allowableEarly = request.getParameter("allowableEarly");;
-  String allowableLate = request.getParameter("allowableLate");;
-  String chartSubtitle = allowableEarly + " min early to " 
-    + allowableLate + " min late</br>" 
+  ResourceBundle labels = ResourceBundle.getBundle("org.transitclock.i18n.text", request.getLocale());
+  String dateRange = request.getParameter("beginDate") + " (+" + request.getParameter("numDays") + " " + labels.getString("Days") + ")";
+  String allowableEarly = request.getParameter("allowableEarly");
+  String allowableLate = request.getParameter("allowableLate");
+  String chartSubtitle = allowableEarly + " " + labels.getString("MinEarlyTo") + " "
+    + allowableLate  + " " + labels.getString("div.minlate") + "</br>" 
 	+ dateRange;
   
   String beginTime = request.getParameter("beginTime");
@@ -65,7 +68,7 @@
 		  beginTime = "00:00"; // default value
 	  if (endTime.isEmpty())
 		  endTime = "24:00";   // default value
-		  chartSubtitle += ", " + beginTime + " to " + endTime;
+		  chartSubtitle += ", " + beginTime + " " + labels.getString("To") + " "  + endTime;
   }  
 %>
     <div id="title"></div>
@@ -97,8 +100,8 @@ function drawChart() {
 function createDataTableAndDrawChart(jsonData) {
     // Initialize the data array with the header that describes the columns
 	var dataArray = [[
-		'Early/Late', 
-		'Stops', 
+		'<fmt:message key="EarlyLate" />', 
+		'<fmt:message key="StopsBig" />', 
 		{ role: 'style' }, 
 		{ role: 'annotation' }, 
 		{ role: 'tooltip' }
@@ -137,13 +140,14 @@ function createDataTableAndDrawChart(jsonData) {
     	
     	var annotation = bucket.counts_per_time_period;
     	
-    	var tooltip = bucket.counts_per_time_period + ' stops for vehicles that are ';
+    	var tooltip = (bucket.counts_per_time_period > 4) ? '<fmt:message key="StopsOver4ForVehiclesThatAre" />' + ' ' :  '<fmt:message key="StopsUnderEq4ForVehiclesThatAre" />' + ' ' ;
+    	tooltip = bucket.counts_per_time_period + ' ' + tooltip;
     	if (bucket.time_period < 0) {
     		// vehicle late
-    		tooltip += -(bucket.time_period+30) + 's to ' + (-bucket.time_period) + 's late. ';
+    		tooltip += -(bucket.time_period+30) + 's ' + '<fmt:message key="To" />' + ' ' + (-bucket.time_period) + ' ' + '<fmt:message key="SecsLate" />' + '. ';
     	} else {
     		// vehicle early
-    		tooltip += bucket.time_period + 's to ' + (bucket.time_period+30) + 's early. ';
+    		tooltip += bucket.time_period + 's ' + '<fmt:message key="To" />' + ' ' + (bucket.time_period+30) + ' ' + '<fmt:message key="SecsEarly" />' + '. ';
     	}
     	
     	var row = [timeFloor, counts, style, annotation, tooltip];
@@ -177,12 +181,12 @@ function createDataTableAndDrawChart(jsonData) {
           chartArea: {top:10, width: '86%', height: '90%'},
           vAxis: {
         	  minValue: 0,
-        	  title: "Number of stops per time interval",
+        	  title: '<fmt:message key="NumberOfStopsPerTimeInterval" />',
         	  textStyle: {fontSize: 12},
         	  },
           hAxis: { 
         	  ticks: ticks,
-        	  title: "Minutes vehicle late (negative) or early (positive)",
+        	  title: '<fmt:message key="MinutesVehicleLateNOrEarlyPositive" />',
         	  // The chart always draws the baseline at value 0 over the chart.
         	  // Since the baseline isn't true zero, since using bars and 
         	  // putting tick marks at the edges of the bars, don't want this
@@ -207,7 +211,7 @@ function createDataTableAndDrawChart(jsonData) {
 function determineChartTitle(routeData) {
 	var agencyName = routeData.agency;
 	var routeName = routeData.routes[0].name;
-	$("#title").html('Schedule Adherence for ' + routeName);
+	$("#title").html('<fmt:message key="ScheduleAdherenceFor" />' + ' ' + routeName);
 }
 
 function getDataAndDrawChart() {
@@ -227,7 +231,7 @@ function getDataAndDrawChart() {
 	    // When there is an AJAX problem alert the user
 	    error: function(request, status, error) {
 	     	console.log(request.responseText)
-            var msg = $("<p>").html("<br>No data for requested parameters. Hit back button to try other parameters.")
+            var msg = $("<p>").html("<br><fmt:message key='NoDataForParameters' />")
             $("#errorMessage").append(msg);
 	        $("#errorMessage").fadeIn("fast");
 	        $("#loading").fadeOut("slow");

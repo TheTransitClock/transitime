@@ -429,6 +429,7 @@
 
     create table VehicleConfigs (
         id varchar(60) not null,
+        name varchar(255),
         capacity integer,
         crushCapacity integer,
         description varchar(255),

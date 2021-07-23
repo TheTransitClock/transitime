@@ -58,6 +58,7 @@ import org.transitclock.api.data.ApiTrip;
 import org.transitclock.api.data.ApiTripPatterns;
 import org.transitclock.api.data.ApiTripWithTravelTimes;
 import org.transitclock.api.data.ApiVehicleConfigs;
+import org.transitclock.api.data.ApiVehicleDetails;
 import org.transitclock.api.data.ApiVehicles;
 import org.transitclock.api.data.ApiVehiclesDetails;
 import org.transitclock.api.predsByLoc.PredsByLoc;
@@ -66,6 +67,7 @@ import org.transitclock.api.utils.WebUtils;
 import org.transitclock.core.TemporalDifference;
 import org.transitclock.db.structs.Agency;
 import org.transitclock.db.structs.Location;
+import org.transitclock.db.structs.VehicleConfig;
 import org.transitclock.ipc.data.IpcActiveBlock;
 import org.transitclock.ipc.data.IpcBlock;
 import org.transitclock.ipc.data.IpcCalendar;
@@ -328,11 +330,23 @@ public class TransitimeApi {
 				vehicles = inter.get();
 			}
 
+			
 			// If the vehicles doesn't exist then throw exception such that
 			// Bad Request with an appropriate message is returned.
 			if (vehicles == null)
 				throw WebUtils.badRequestException("Invalid specifier for " + "vehicles");
 
+			
+			 for(IpcVehicle ipcVehicle : vehicles) {
+        		 for(IpcVehicleConfig iVC : inter.getVehicleConfigs()) {
+        			 if(iVC.getId().equals(ipcVehicle.getId())) {
+        				 ipcVehicle.setVehicleName(iVC.getName());
+         				 System.out.println(ipcVehicle.getVehicleName() + " " + iVC.getName());
+        				 break;
+        			 }
+        		 }        		 
+        	 }
+			 
 			// To determine how vehicles should be drawn in UI. If stop
 			// specified
 			// when getting vehicle info then only the vehicles being predicted
@@ -343,6 +357,8 @@ public class TransitimeApi {
 			// Convert IpcVehiclesDetails to ApiVehiclesDetails
 			ApiVehiclesDetails apiVehiclesDetails = new ApiVehiclesDetails(vehicles, stdParameters.getAgencyId(),
 					uiTypesForVehicles,onlyAssigned);
+			
+			
 
 			// return ApiVehiclesDetails response
 			Response result = null;
@@ -1231,10 +1247,26 @@ public class TransitimeApi {
           Collection<IpcActiveBlock> activeBlocks = vehiclesInterface
                   .getActiveBlocksAndVehiclesByRouteName(routeName,
                           allowableBeforeTimeSecs);
+          VehiclesInterface inter = stdParameters.getVehiclesInterface();
+			
+          
+          for(IpcActiveBlock ipcActiveBlocks : activeBlocks) {
+        	 for(IpcVehicle ipcVehicle : ipcActiveBlocks.getVehicles()) {
+        		 for(IpcVehicleConfig iVC : vehiclesInterface.getVehicleConfigs()) {
+        			 
+        			 if(iVC.getId().equals(ipcVehicle.getId())) {
+        				 ipcVehicle.setVehicleName(iVC.getName());
+        				 
+        				 break;
+        			 }
+        		 }        		 
+        	 }
+          }
 
           // Create and return ApiBlock response
           ApiActiveBlocksRoutes apiActiveBlocksRoutes = new ApiActiveBlocksRoutes(
                   activeBlocks, stdParameters.getAgencyId());
+          
           return stdParameters.createResponse(apiActiveBlocksRoutes);
       } catch (Exception e) {
           // If problem getting data then return a Bad Request

@@ -31,7 +31,7 @@ import org.transitclock.ipc.data.IpcVehicleConfig;
  */
 @XmlRootElement(name = "vehicleConfig")
 @XmlType(propOrder = { "id", "type", "description", "capacity",
-		"crushCapacity", "nonPassengerVehicle" })
+		"crushCapacity", "nonPassengerVehicle", "name" })
 public class ApiVehicleConfig {
 
 	@XmlAttribute
@@ -52,6 +52,9 @@ public class ApiVehicleConfig {
 	@XmlAttribute
 	private Boolean nonPassengerVehicle;
 	
+	@XmlAttribute
+	private String name;
+	
 	/********************** Member Functions **************************/
 
 	/**
@@ -68,6 +71,7 @@ public class ApiVehicleConfig {
 		this.capacity = vehicle.getCapacity();
 		this.crushCapacity = vehicle.getCrushCapacity();
 		this.nonPassengerVehicle = vehicle.isNonPassengerVehicle();
+		this.name = vehicle.getName();
 	}
 
 }
