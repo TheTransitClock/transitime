@@ -1,18 +1,17 @@
-There are several main classes which are used in the set up of the system. These can be run directly by specifying the class to run or by using the executable jar in the target directory.
+There are several main classes which are used in the set-up of the system. These can be run directly by specifying the class to run or by using the executable jar in the target directory.
 
 The steps to set up the system are 
 <ul>
-	<li>Create Database. For this step you are on your own and you should find instructions on the related database providers web sites.
+	<li>Create Database. For this step you are on your own, and you should find instructions on the related database providers websites.
 	</li>
 	<li>Create Database structures
 		using generateDatabaseScheme.jar
-	</li>
 	</li>
 	<li>Import GTFS static data using
 		processGTFSFile.jar
 	</li>		
 	<li>Get access to a source of realtime GPS data.</li>
-	<li>Create transiTime module to read realtime GPS data or create a converter to convert the realtime datasource to a GTFS-RT vechicle location source.</li>
+	<li>Create transiTime module to read realtime GPS data or create a converter to convert the realtime datasource to a GTFS-RT vehicle location source.</li>
 	<li>Config and run core module</li>
 	<li>Create Web Agency using WebAgency class</li>
 	<li>Create API key. For the moment see TestAPIKeyManager.java test. The testAPIKeyManger test will create a key for you.</li>
@@ -23,7 +22,7 @@ The steps to set up the system are
 
 generateDatabaseSchema.jar -- Main class: org.transitclock.applications.SchemaGenerator
 =================================
-ISSUE: skip to ISSUE below for the moment as there is a classloader issue when using onejar.
+ISSUE: skip to ISSUE below for the moment as there is a classloader issue when using one jar.
 <br/>
 The jar generateDatabaseSchema.jar can be used to re-generate the SQL required to create the database structures required to run transiTime. It generates three files in the specified directory. A file is generated for each supported database type. (Postgres, Oracle, Mysql). The script generated will drop tables that already exist.
 <br/>

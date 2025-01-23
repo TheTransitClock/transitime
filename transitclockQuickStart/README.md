@@ -2,14 +2,17 @@ How to set up transiTime QuickStart:
 
 to build the program, you can do this with the command
 
+```shell
 mvn install -DskipTests
+```
 
 This will take a few minutes to run. when complete navigate to 
 transitimeQuickStart
-from here you see the target/transitimeQuickStart.jar to run it from here enter the line:
+from here you see the `target/transitimeQuickStart.jar` to run it from here enter the line:
 
-
+```shell
 java -jar -Dtransitclock.configFiles=src/main/resources/transitclock.properties target/transitclockQuickStart.jar
+```
 
 The gui should then pop up if done correctly.
 
